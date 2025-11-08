@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Safari: The Great Vocabulary Hunt</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- 🎮 Main Container -->
+    <div id="app">
+        
+        <!-- 🌅 Start Menu Screen -->
+        <div id="start-screen" class="screen active">
+            <!-- Animated Background -->
+            <div class="safari-background">
+                <svg viewBox="0 0 1200 600" class="bg-svg">
+                    <!-- Sky -->
+                    <rect fill="#87CEEB" width="1200" height="600"/>
+                    
+                    <!-- Sun -->
+                    <circle cx="1000" cy="100" r="60" fill="#FFD700" opacity="0.9">
+                        <animate attributeName="r" values="60;65;60" dur="3s" repeatCount="indefinite"/>
+                    </circle>
+                    
+                    <!-- Mountains -->
+                    <polygon points="0,400 200,250 400,400" fill="#8B7355"/>
+                    <polygon points="300,400 500,200 700,400" fill="#A0826D"/>
+                    <polygon points="600,400 900,280 1200,400" fill="#8B7355"/>
+                    
+                    <!-- Ground -->
+                    <rect y="400" width="1200" height="200" fill="#D2B48C"/>
+                    
+                    <!-- Grass patches -->
+                    <g class="grass-layer">
+                        <ellipse cx="100" cy="420" rx="80" ry="15" fill="#9ACD32" opacity="0.6"/>
+                        <ellipse cx="300" cy="430" rx="100" ry="20" fill="#9ACD32" opacity="0.5"/>
+                        <ellipse cx="600" cy="425" rx="90" ry="18" fill="#9ACD32" opacity="0.6"/>
+                        <ellipse cx="900" cy="435" rx="110" ry="22" fill="#9ACD32" opacity="0.5"/>
+                    </g>
+                    
+                    <!-- Animated clouds -->
+                    <g class="cloud" style="animation: float-cloud 30s linear infinite;">
+                        <ellipse cx="200" cy="100" rx="40" ry="20" fill="white" opacity="0.8"/>
+                        <ellipse cx="230" cy="100" rx="50" ry="25" fill="white" opacity="0.8"/>
+                        <ellipse cx="260" cy="100" rx="40" ry="20" fill="white" opacity="0.8"/>
+                    </g>
+                    <g class="cloud" style="animation: float-cloud 40s linear infinite 5s;">
+                        <ellipse cx="600" cy="150" rx="35" ry="18" fill="white" opacity="0.7"/>
+                        <ellipse cx="625" cy="150" rx="45" ry="22" fill="white" opacity="0.7"/>
+                        <ellipse cx="650" cy="150" rx="35" ry="18" fill="white" opacity="0.7"/>
+                    </g>
+                </svg>
+            </div>
+
+            <!-- Logo & Title -->
+            <div class="title-container">
+                <h1 class="game-title">
+                    <span class="title-word">Word</span>
+                    <span class="title-safari">Safari</span>
+                </h1>
+                <p class="subtitle">🦁 The Great Vocabulary Hunt 🦒</p>
+            </div>
+
+            <!-- Menu Buttons -->
+            <div class="menu-buttons">
+                <button class="btn btn-primary" id="btn-play">
+                    <span class="btn-icon">🎮</span>
+                    Play Now
+                </button>
+                <button class="btn btn-secondary" id="btn-spelling">
+                    <span class="btn-icon">📝</span>
+                    Spelling Bee
+                </button>
+                <button class="btn btn-secondary" id="btn-daily">
+                    <span class="btn-icon">⏱️</span>
+                    Daily Quest
+                </button>
+                <button class="btn btn-info" id="btn-instructions">
+                    <span class="btn-icon">📖</span>
+                    How to Play
+                </button>
+            </div>
+
+            <!-- Sound Toggle -->
+            <button class="sound-toggle" id="sound-toggle">🔊</button>
+        </div>
+
+        <!-- 🎯 Game Screen -->
+        <div id="game-screen" class="screen">
+            <!-- HUD -->
+            <div class="hud">
+                <div class="hud-item">
+                    <span class="hud-label">Score:</span>
+                    <span class="hud-value" id="score">0</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label">Level:</span>
+                    <span class="hud-value" id="level">1</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label">Time:</span>
+                    <span class="hud-value" id="timer">60</span>
+                </div>
+                <button class="btn-small" id="btn-pause">⏸️</button>
+            </div>
+
+            <!-- Clue Display -->
+            <div class="clue-box" id="clue-box">
+                <p class="clue-text">Find the animal that is: <strong id="clue-word">tall</strong></p>
+            </div>
+
+            <!-- Game Canvas/Area -->
+            <div id="game-area" class="game-area">
+                <!-- Animals will be spawned here dynamically -->
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+        </div>
+
+        <!-- 📝 Spelling Bee Screen -->
+        <div id="spelling-screen" class="screen">
+            <h2 class="screen-title">🐝 Spelling Bee Challenge</h2>
+            
+            <div class="spelling-container">
+                <div class="word-audio">
+                    <button class="btn-audio" id="btn-play-word">🔊 Listen</button>
+                    <p class="spelling-hint" id="spelling-hint">Type the word you hear</p>
+                </div>
+
+                <input type="text" id="spelling-input" class="spelling-input" placeholder="Type here...">
+                
+                <div class="spelling-buttons">
+                    <button class="btn btn-primary" id="btn-check-spelling">Check Answer</button>
+                    <button class="btn btn-secondary" id="btn-spelling-skip">Skip</button>
+                </div>
+
+                <div class="spelling-feedback" id="spelling-feedback"></div>
+                
+                <div class="spelling-score">
+                    <span>Correct: <strong id="spelling-correct">0</strong></span>
+                    <span>Wrong: <strong id="spelling-wrong">0</strong></span>
+                </div>
+            </div>
+
+            <button class="btn-back" id="btn-back-spelling">← Back to Menu</button>
+        </div>
+
+        <!-- ⏱️ Daily Quest Screen -->
+        <div id="daily-screen" class="screen">
+            <h2 class="screen-title">⏱️ Daily Quest Challenge</h2>
+            
+            <div class="daily-container">
+                <div class="daily-timer">
+                    <span class="timer-label">Time Remaining:</span>
+                    <span class="timer-value" id="daily-timer">30</span>
+                </div>
+
+                <div class="daily-question" id="daily-question">
+                    <p class="question-text">What is the opposite of "happy"?</p>
+                    <div class="answer-options" id="answer-options">
+                        <button class="answer-btn">Sad</button>
+                        <button class="answer-btn">Angry</button>
+                        <button class="answer-btn">Excited</button>
+                        <button class="answer-btn">Tired</button>
+                    </div>
+                </div>
+
+                <div class="daily-progress">
+                    <span>Questions: <strong><span id="daily-current">1</span>/<span id="daily-total">5</span></strong></span>
+                </div>
+            </div>
+
+            <button class="btn-back" id="btn-back-daily">← Back to Menu</button>
+        </div>
+
+        <!-- 🏆 End Screen -->
+        <div id="end-screen" class="screen">
+            <h2 class="screen-title">🎉 Adventure Complete!</h2>
+            
+            <div class="end-stats">
+                <div class="stat-card">
+                    <span class="stat-value" id="end-score">0</span>
+                    <span class="stat-label">Final Score</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="end-level">1</span>
+                    <span class="stat-label">Level Reached</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-value" id="end-stars">⭐⭐⭐</span>
+                    <span class="stat-label">Stars Earned</span>
+                </div>
+            </div>
+
+            <div class="end-message" id="end-message">
+                <p>Well done, Safari Explorer! 🦁</p>
+            </div>
+
+            <div class="end-buttons">
+                <button class="btn btn-primary" id="btn-play-again">Play Again</button>
+                <button class="btn btn-secondary" id="btn-menu">Main Menu</button>
+            </div>
+        </div>
+
+        <!-- 📖 Instructions Modal -->
+        <div id="instructions-modal" class="modal">
+            <div class="modal-content">
+                <button class="modal-close" id="modal-close">✖️</button>
+                <h2>📖 How to Play Word Safari</h2>
+                
+                <div class="instructions-grid">
+                    <div class="instruction-item">
+                        <span class="instruction-icon">🎯</span>
+                        <h3>Safari Adventure</h3>
+                        <p>Click on animals that match the word clue. Listen carefully and choose wisely!</p>
+                    </div>
+                    
+                    <div class="instruction-item">
+                        <span class="instruction-icon">📝</span>
+                        <h3>Spelling Bee</h3>
+                        <p>Listen to the word and type the correct spelling. Practice makes perfect!</p>
+                    </div>
+                    
+                    <div class="instruction-item">
+                        <span class="instruction-icon">⏱️</span>
+                        <h3>Daily Quest</h3>
+                        <p>Answer questions quickly! Beat the clock to earn bonus points.</p>
+                    </div>
+                    
+                    <div class="instruction-item">
+                        <span class="instruction-icon">⭐</span>
+                        <h3>Earn Stars</h3>
+                        <p>Collect stars to unlock new biomes: Savanna → Forest → River!</p>
+                    </div>
+                </div>
+
+                <div class="tips-section">
+                    <h3>🎮 Tips:</h3>
+                    <ul>
+                        <li>Use headphones for the best experience</li>
+                        <li>Click the 🔊 icon to toggle sound</li>
+                        <li>Take your time to read each clue carefully</li>
+                        <li>Earn XP to unlock special animal cards</li>
+                    </ul>
+                </div>
+
+                <button class="btn btn-primary" id="btn-start-instructions">Let's Go! 🚀</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 🎵 Audio Elements (Hidden) -->
+    <audio id="audio-ambient" loop>
+        <source src="assets/audio/ambient/safari-ambient.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="audio-correct">
+        <source src="assets/audio/effects/correct.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="audio-wrong">
+        <source src="assets/audio/effects/wrong.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="audio-click">
+        <source src="assets/audio/effects/click.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- 📦 Scripts -->
+    <script type="module" src="js/data/words.js"></script>
+    <script type="module" src="js/audio.js"></script>
+    <script type="module" src="js/game.js"></script>
+    <script type="module" src="js/ui.js"></script>
+</body>
+</html>
