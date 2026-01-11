@@ -31,11 +31,10 @@ body {
     font-family: var(--font-primary);
     background: linear-gradient(180deg, var(--color-sky) 0%, var(--color-earth) 100%);
     min-height: 100vh;
-    overflow: hidden;
     color: var(--color-dark);
 }
 
-#app { width: 100vw; height: 100vh; position: relative; overflow: hidden; }
+#app { width: 100vw; height: 100vh; position: relative; }
 
 .screen {
     position: absolute; inset: 0;
@@ -48,7 +47,7 @@ body {
 
 .screen.active { display: flex; }
 
-#start-screen { position: relative; }
+#start-screen { position: relative; overflow-y: auto; justify-content: flex-start; }
 
 .title-container {
     position: relative; z-index: 2;
@@ -199,6 +198,7 @@ body {
     display: flex; flex-direction: column;
     gap: var(--spacing-sm);
     width: 100%; max-width: 400px;
+    margin-bottom: var(--spacing-xl);
 }
 
 .btn {

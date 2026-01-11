@@ -214,7 +214,8 @@ localStorage.removeItem('wordSafariProgress');
 - [ ] Additional languages
 - [ ] Sentence builder mini-game
 - [ ] Voice input for spelling
-- [ ] Difficulty selector
+- [x] Difficulty selector
+- [x] Achievement badges system
 
 ### Mobile App
 Consider converting to:

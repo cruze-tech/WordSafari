@@ -456,9 +456,6 @@ gtag('event', 'game_complete', {
 - [ ] All buttons clickable
 - [ ] Progress saves correctly
 - [ ] No console errors
-- [ ] Instructions modal works
-- [ ] All game modes functional
-- [ ] Responsive on all screen sizes
 
 ---
 
