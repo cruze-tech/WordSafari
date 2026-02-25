@@ -6,6 +6,7 @@
     "test:pwa": "node test.js --scenario=pwa",
     "test:offline": "node test.js --scenario=offline",
     "test:migration": "node test.js --scenario=migration",
+    "test:uiflow": "node test.js --scenario=uiflow",
     "test:readiness": "node test.js --scenario=readiness"
   },
   "dependencies": {

@@ -258,16 +258,95 @@ async function runMigrationTest(browser) {
   return 'Migration test passed';
 }
 
+async function runUiFlowTest(browser) {
+  const page = await preparePage(browser, {
+    seedStorage: () => {
+      localStorage.removeItem('wordSafari_welcome_seen_v3');
+    }
+  });
+
+  await page.goto(BASE_URL, { waitUntil: 'networkidle0' });
+
+  const welcomeVisible = await page.$eval('#welcome-modal', (el) => el.classList.contains('active'));
+  assert(welcomeVisible, 'Welcome modal should open for first-time visits.');
+
+  await page.click('#btn-welcome-start');
+  await page.waitForFunction(() => {
+    const modal = document.getElementById('welcome-modal');
+    return modal && !modal.classList.contains('active');
+  }, { timeout: 3000 });
+
+  await page.click('#btn-open-settings');
+  await page.waitForFunction(() => {
+    const modal = document.getElementById('settings-modal');
+    return modal && modal.classList.contains('active');
+  }, { timeout: 3000 });
+
+  await page.$eval('#settings-volume', (el) => {
+    el.value = '35';
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+
+  const volumeLabel = await page.$eval('#settings-volume-value', (el) => el.textContent.trim());
+  assert(volumeLabel === '35%', 'Settings volume display should update after slider input.');
+
+  await page.click('#settings-reduced-motion');
+  const hasReducedMotionClass = await page.$eval('body', (el) => el.classList.contains('reduced-motion'));
+  assert(hasReducedMotionClass, 'Reduced motion toggle should apply reduced-motion class on body.');
+
+  await page.click('#btn-settings-done');
+  await page.waitForFunction(() => {
+    const modal = document.getElementById('settings-modal');
+    return modal && !modal.classList.contains('active');
+  }, { timeout: 3000 });
+
+  await page.click('#btn-play');
+  await page.waitForFunction(() => {
+    const game = document.getElementById('game-screen');
+    return game && game.classList.contains('active');
+  }, { timeout: 4000 });
+
+  await page.click('#btn-pause');
+  await page.waitForFunction(() => {
+    const pause = document.getElementById('pause-modal');
+    return pause && pause.classList.contains('active');
+  }, { timeout: 3000 });
+
+  await page.click('#btn-settings');
+  await page.waitForFunction(() => {
+    const settings = document.getElementById('settings-modal');
+    const pause = document.getElementById('pause-modal');
+    return settings && pause && settings.classList.contains('active') && !pause.classList.contains('active');
+  }, { timeout: 3000 });
+
+  await page.click('#btn-settings-done');
+  await page.waitForFunction(() => {
+    const settings = document.getElementById('settings-modal');
+    const pause = document.getElementById('pause-modal');
+    return settings && pause && !settings.classList.contains('active') && pause.classList.contains('active');
+  }, { timeout: 3000 });
+
+  await page.click('#btn-resume');
+  await page.waitForFunction(() => {
+    const pause = document.getElementById('pause-modal');
+    return pause && !pause.classList.contains('active');
+  }, { timeout: 3000 });
+
+  await page.close();
+  return 'UI flow test passed';
+}
+
 async function runScenario(browser, scenario) {
   const scenarios = {
     smoke: runSmokeTest,
     pwa: runPwaTest,
     offline: runOfflineTest,
-    migration: runMigrationTest
+    migration: runMigrationTest,
+    uiflow: runUiFlowTest
   };
 
   if (scenario === 'readiness') {
-    const ordered = ['smoke', 'pwa', 'offline', 'migration'];
+    const ordered = ['smoke', 'pwa', 'offline', 'migration', 'uiflow'];
     const results = [];
 
     for (const name of ordered) {

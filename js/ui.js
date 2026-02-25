@@ -3,7 +3,7 @@
  */
 
 import { gameManager, spellingBeeManager, dailyQuestManager, sentenceBuilderManager } from './game.js';
-import { playSound, toggleMute } from './audio.js';
+import { playSound, toggleMute, setVolume, getVolume, setMuted, isMuted } from './audio.js';
 import { achievementManager } from './achievements.js';
 import { progressionManager } from './progression.js';
 
@@ -12,11 +12,38 @@ import { progressionManager } from './progression.js';
    ======================================== */
 class UIManager {
     constructor() {
+        this.uiSettingsKey = 'wordSafari_ui_settings';
+        this.welcomeSeenKey = 'wordSafari_welcome_seen_v3';
+        this.returnToPauseAfterSettings = false;
+        this.canInstallPwa = false;
+        this.uiSettings = this.loadUISettings();
+
         this.currentScreen = 'start';
         this.screens = ['start', 'game', 'spelling', 'daily', 'sentence', 'end'];
+
+        this.applyReducedMotion();
         this.initializeEventListeners();
         this.syncDifficultyButtons();
+        this.syncSettingsPanelState();
         this.updateStatsDisplay();
+    }
+
+    loadUISettings() {
+        const defaults = { reducedMotion: false };
+        const raw = localStorage.getItem(this.uiSettingsKey);
+        if (!raw) return defaults;
+
+        try {
+            const parsed = JSON.parse(raw);
+            return { reducedMotion: Boolean(parsed.reducedMotion) };
+        } catch (error) {
+            console.warn('UI settings were corrupted and reset to defaults.');
+            return defaults;
+        }
+    }
+
+    saveUISettings() {
+        localStorage.setItem(this.uiSettingsKey, JSON.stringify(this.uiSettings));
     }
 
     initializeEventListeners() {
@@ -51,9 +78,19 @@ class UIManager {
             this.showInstructions();
         });
 
+        document.getElementById('btn-open-settings')?.addEventListener('click', () => {
+            playSound('click');
+            this.showSettings(false);
+        });
+
+        document.getElementById('btn-welcome')?.addEventListener('click', () => {
+            playSound('click');
+            this.showWelcomePanel(true);
+        });
+
         // Difficulty selector
         document.querySelectorAll('.difficulty-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
+            btn.addEventListener('click', () => {
                 playSound('click');
                 document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
@@ -66,6 +103,7 @@ class UIManager {
         document.getElementById('sound-toggle')?.addEventListener('click', () => {
             playSound('click');
             toggleMute();
+            this.syncSettingsPanelState();
         });
 
         // Achievements modal
@@ -105,11 +143,82 @@ class UIManager {
             this.startGame();
         });
 
+        document.getElementById('btn-settings')?.addEventListener('click', () => {
+            playSound('click');
+            this.hidePauseMenu();
+            this.showSettings(true);
+        });
+
         document.getElementById('btn-quit')?.addEventListener('click', () => {
             playSound('click');
             this.hidePauseMenu();
             this.showScreen('start');
             this.updateStatsDisplay();
+        });
+
+        // Settings modal
+        document.getElementById('settings-close')?.addEventListener('click', () => {
+            playSound('click');
+            this.hideSettings();
+        });
+
+        document.getElementById('btn-settings-done')?.addEventListener('click', () => {
+            playSound('click');
+            this.hideSettings();
+        });
+
+        document.getElementById('settings-volume')?.addEventListener('input', (e) => {
+            const value = Number(e.target.value);
+            this.updateVolumeValue(value);
+            setVolume(value / 100);
+        });
+
+        document.getElementById('settings-mute')?.addEventListener('change', (e) => {
+            setMuted(Boolean(e.target.checked));
+            this.syncSettingsPanelState();
+        });
+
+        document.getElementById('settings-reduced-motion')?.addEventListener('change', (e) => {
+            this.uiSettings.reducedMotion = Boolean(e.target.checked);
+            this.saveUISettings();
+            this.applyReducedMotion();
+        });
+
+        // Welcome / install modal
+        document.getElementById('welcome-close')?.addEventListener('click', () => {
+            playSound('click');
+            this.hideWelcomePanel();
+        });
+
+        document.getElementById('btn-welcome-start')?.addEventListener('click', () => {
+            playSound('click');
+            this.hideWelcomePanel();
+        });
+
+        document.getElementById('btn-welcome-install')?.addEventListener('click', () => {
+            playSound('click');
+            const statusEl = document.getElementById('welcome-install-status');
+            if (statusEl) statusEl.textContent = 'Opening install prompt...';
+            window.dispatchEvent(new CustomEvent('pwa-install-request'));
+        });
+
+        window.addEventListener('pwa-install-availability', (event) => {
+            this.canInstallPwa = Boolean(event.detail?.canInstall);
+            this.updateWelcomeInstallState();
+        });
+
+        window.addEventListener('pwa-install-result', (event) => {
+            const outcome = event.detail?.outcome;
+            const statusEl = document.getElementById('welcome-install-status');
+
+            if (outcome === 'accepted') {
+                localStorage.setItem('wordSafari_pwa_installed', 'yes');
+                if (statusEl) statusEl.textContent = 'Installed! You can launch Word Safari from your home screen.';
+            } else if (outcome === 'dismissed') {
+                if (statusEl) statusEl.textContent = 'Install dismissed. You can always install later from this panel.';
+            }
+
+            this.updateWelcomeInstallState();
         });
 
         // Animal fact card
@@ -205,7 +314,13 @@ class UIManager {
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) {
                     playSound('click');
-                    modal.classList.remove('active');
+                    if (modal.id === 'settings-modal') {
+                        this.hideSettings();
+                    } else if (modal.id === 'welcome-modal') {
+                        this.hideWelcomePanel();
+                    } else {
+                        modal.classList.remove('active');
+                    }
                 }
             });
         });
@@ -213,6 +328,16 @@ class UIManager {
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
+                if (document.getElementById('settings-modal')?.classList.contains('active')) {
+                    this.hideSettings();
+                    return;
+                }
+
+                if (document.getElementById('welcome-modal')?.classList.contains('active')) {
+                    this.hideWelcomePanel();
+                    return;
+                }
+
                 if (this.currentScreen === 'game' && gameManager.isPlaying) {
                     this.showPauseMenu();
                 } else {
@@ -221,7 +346,10 @@ class UIManager {
                     });
                 }
             }
-            if (e.key.toLowerCase() === 'm') toggleMute();
+            if (e.key.toLowerCase() === 'm') {
+                toggleMute();
+                this.syncSettingsPanelState();
+            }
         });
     }
 
@@ -239,6 +367,48 @@ class UIManager {
         document.querySelectorAll('.difficulty-btn').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.difficulty === difficulty);
         });
+    }
+
+    updateVolumeValue(value) {
+        const valueEl = document.getElementById('settings-volume-value');
+        if (valueEl) valueEl.textContent = `${Math.round(value)}%`;
+    }
+
+    syncSettingsPanelState() {
+        const volume = Math.round(getVolume() * 100);
+        const volumeInput = document.getElementById('settings-volume');
+        const muteInput = document.getElementById('settings-mute');
+        const reduceMotionInput = document.getElementById('settings-reduced-motion');
+
+        if (volumeInput) volumeInput.value = String(volume);
+        this.updateVolumeValue(volume);
+        if (muteInput) muteInput.checked = isMuted();
+        if (reduceMotionInput) reduceMotionInput.checked = Boolean(this.uiSettings.reducedMotion);
+    }
+
+    applyReducedMotion() {
+        document.body.classList.toggle('reduced-motion', Boolean(this.uiSettings.reducedMotion));
+    }
+
+    updateWelcomeInstallState() {
+        const installBtn = document.getElementById('btn-welcome-install');
+        const statusEl = document.getElementById('welcome-install-status');
+        const alreadyInstalled = localStorage.getItem('wordSafari_pwa_installed') === 'yes';
+
+        if (alreadyInstalled) {
+            if (installBtn) installBtn.classList.add('hidden');
+            if (statusEl) statusEl.textContent = 'Word Safari is already installed on this device.';
+            return;
+        }
+
+        if (this.canInstallPwa) {
+            if (installBtn) installBtn.classList.remove('hidden');
+            if (statusEl) statusEl.textContent = 'This device supports install. Tap Install App to continue.';
+            return;
+        }
+
+        if (installBtn) installBtn.classList.add('hidden');
+        if (statusEl) statusEl.textContent = 'Install prompt will appear when supported by your browser.';
     }
 
     showScreen(name) {
@@ -270,6 +440,43 @@ class UIManager {
 
     hidePauseMenu() {
         document.getElementById('pause-modal').classList.remove('active');
+    }
+
+    showSettings(returnToPause = false) {
+        this.returnToPauseAfterSettings = returnToPause;
+        this.syncSettingsPanelState();
+        document.getElementById('settings-modal')?.classList.add('active');
+    }
+
+    hideSettings() {
+        document.getElementById('settings-modal')?.classList.remove('active');
+
+        if (this.returnToPauseAfterSettings && this.currentScreen === 'game') {
+            document.getElementById('pause-modal')?.classList.add('active');
+        }
+
+        this.returnToPauseAfterSettings = false;
+    }
+
+    showWelcomePanel(userInitiated = false) {
+        if (!userInitiated) {
+            localStorage.setItem(this.welcomeSeenKey, 'yes');
+        }
+
+        this.updateWelcomeInstallState();
+        document.getElementById('welcome-modal')?.classList.add('active');
+    }
+
+    hideWelcomePanel() {
+        localStorage.setItem(this.welcomeSeenKey, 'yes');
+        document.getElementById('welcome-modal')?.classList.remove('active');
+    }
+
+    maybeShowWelcomePanel() {
+        const seenWelcome = localStorage.getItem(this.welcomeSeenKey) === 'yes';
+        if (!seenWelcome) {
+            this.showWelcomePanel(false);
+        }
     }
 
     showSpellingBee() {
@@ -325,7 +532,6 @@ class UIManager {
         const msg = this.getEndMessage(stars);
         document.getElementById('end-message').innerHTML = `<p>${msg}</p>`;
 
-        // Display newly unlocked achievements
         const unlockedContainer = document.getElementById('unlocked-achievements');
         if (newAchievements.length > 0) {
             unlockedContainer.innerHTML = newAchievements.map(ach => `
@@ -338,7 +544,6 @@ class UIManager {
                 </div>
             `).join('');
 
-            // Show notifications
             newAchievements.forEach((ach, index) => {
                 setTimeout(() => achievementManager.showNotification(ach), index * 1000);
             });
@@ -381,6 +586,9 @@ window.addEventListener('resize', () => uiManager.updateLayout());
 window.addEventListener('load', () => {
     uiManager.updateLayout();
     uiManager.updateStatsDisplay();
+    uiManager.syncSettingsPanelState();
+    uiManager.updateWelcomeInstallState();
+    uiManager.maybeShowWelcomePanel();
 });
 
 // Prevent default behaviors

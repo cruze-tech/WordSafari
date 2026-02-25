@@ -6,6 +6,7 @@
    ======================================== */
 class AudioManager {
     constructor() {
+        this.settingsKey = 'wordSafari_audio_settings';
         this.sounds = {
             ambient: null,
             correct: null,
@@ -15,7 +16,38 @@ class AudioManager {
         this.isMuted = false;
         this.volume = 0.5;
         this.speechSynthesis = window.speechSynthesis;
+        this.loadSettings();
         this.init();
+    }
+
+    loadSettings() {
+        const raw = localStorage.getItem(this.settingsKey);
+        if (!raw) return;
+
+        try {
+            const parsed = JSON.parse(raw);
+            if (typeof parsed.isMuted === 'boolean') this.isMuted = parsed.isMuted;
+            if (typeof parsed.volume === 'number') {
+                this.volume = Math.max(0, Math.min(1, parsed.volume));
+            }
+        } catch (error) {
+            console.warn('Audio settings were corrupted and reset to defaults.');
+        }
+    }
+
+    saveSettings() {
+        localStorage.setItem(this.settingsKey, JSON.stringify({
+            isMuted: this.isMuted,
+            volume: this.volume,
+        }));
+    }
+
+    updateMuteButton() {
+        const toggle = document.getElementById('sound-toggle');
+        if (toggle) {
+            toggle.textContent = this.isMuted ? '🔇' : '🔊';
+            toggle.classList.toggle('muted', this.isMuted);
+        }
     }
 
     init() {
@@ -30,6 +62,8 @@ class AudioManager {
             Object.values(this.sounds).forEach(sound => {
                 if (sound) sound.volume = this.volume;
             });
+
+            this.updateMuteButton();
         } catch (error) {
             console.log('Audio files not found, using fallback');
         }
@@ -37,7 +71,7 @@ class AudioManager {
 
     playSound(soundName, loop = false) {
         if (this.isMuted) return;
-        
+
         const sound = this.sounds[soundName];
         if (sound) {
             sound.loop = loop;
@@ -59,26 +93,36 @@ class AudioManager {
         Object.values(this.sounds).forEach(sound => {
             if (sound) sound.volume = this.volume;
         });
+        this.saveSettings();
     }
 
-    toggleMute() {
-        this.isMuted = !this.isMuted;
-        const toggle = document.getElementById('sound-toggle');
-        if (toggle) {
-            toggle.textContent = this.isMuted ? '🔇' : '🔊';
-            toggle.classList.toggle('muted');
-        }
-        
+    getVolume() {
+        return this.volume;
+    }
+
+    setMuted(value) {
+        this.isMuted = Boolean(value);
+        this.updateMuteButton();
+
         if (this.isMuted) {
             this.stopSound('ambient');
         }
-        
+
+        this.saveSettings();
+    }
+
+    toggleMute() {
+        this.setMuted(!this.isMuted);
+        return this.isMuted;
+    }
+
+    getMuted() {
         return this.isMuted;
     }
 
     speak(text, rate = 0.9) {
         if (this.isMuted) return;
-        
+
         if (this.speechSynthesis) {
             this.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
@@ -109,6 +153,22 @@ export function speak(text, rate = 0.9) {
 
 export function toggleMute() {
     return audioManager.toggleMute();
+}
+
+export function setVolume(level) {
+    audioManager.setVolume(level);
+}
+
+export function getVolume() {
+    return audioManager.getVolume();
+}
+
+export function setMuted(value) {
+    audioManager.setMuted(value);
+}
+
+export function isMuted() {
+    return audioManager.getMuted();
 }
 
 /* ========================================

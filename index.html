@@ -96,8 +96,10 @@
                 <button id="btn-spelling" class="btn btn-secondary">🐝 Spelling Bee</button>
                 <button id="btn-daily" class="btn btn-info">⏱️ Daily Quest</button>
                 <button id="btn-sentence" class="btn btn-primary">🧩 Sentence Builder</button>
+                <button id="btn-welcome" class="btn btn-info">🌍 Welcome</button>
                 <button id="btn-achievements" class="btn btn-small">🏆 Achievements</button>
                 <button id="btn-instructions" class="btn btn-small">📖 How to Play</button>
+                <button id="btn-open-settings" class="btn btn-small">⚙️ Settings</button>
             </div>
             <button id="sound-toggle" class="sound-toggle">🔊</button>
         </div>
@@ -312,6 +314,68 @@
                     <button id="btn-restart" class="btn btn-secondary">🔄 Restart Level</button>
                     <button id="btn-settings" class="btn btn-info">⚙️ Settings</button>
                     <button id="btn-quit" class="btn btn-small">🏠 Main Menu</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Modal -->
+        <div id="settings-modal" class="modal">
+            <div class="modal-content settings-card">
+                <button id="settings-close" class="modal-close">✕</button>
+                <h2>⚙️ Settings</h2>
+                <div class="settings-group">
+                    <label for="settings-volume">
+                        Master Volume
+                        <span id="settings-volume-value">50%</span>
+                    </label>
+                    <input id="settings-volume" type="range" min="0" max="100" value="50" />
+                </div>
+                <div class="settings-toggle-row">
+                    <label for="settings-mute">Mute all sounds</label>
+                    <input id="settings-mute" type="checkbox" />
+                </div>
+                <div class="settings-toggle-row">
+                    <label for="settings-reduced-motion">Reduce motion effects</label>
+                    <input id="settings-reduced-motion" type="checkbox" />
+                </div>
+                <div class="settings-actions">
+                    <button id="btn-settings-done" class="btn btn-primary">Done</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Welcome / PWA Install Modal -->
+        <div id="welcome-modal" class="modal">
+            <div class="modal-content welcome-card">
+                <button id="welcome-close" class="modal-close">✕</button>
+                <h2>🌍 Welcome To Word Safari</h2>
+                <p class="welcome-intro">
+                    Install Word Safari for faster launch, smoother offline play, and a full-screen safari learning experience.
+                    When your browser shows the install prompt, tap Install to save the app on your device.
+                </p>
+
+                <div class="welcome-install-panel">
+                    <button id="btn-welcome-install" class="btn btn-primary hidden">⬇️ Install App</button>
+                    <div id="welcome-install-status" class="welcome-install-status">
+                        Install prompt will appear when supported by your browser.
+                    </div>
+                </div>
+
+                <div class="welcome-heartfelt">
+                    <h3>From The Cruze Tech Team</h3>
+                    <p>
+                        Led by Gabriel, we built Word Safari with heart to make learning joyful, safe, and memorable for every child.
+                        Thank you for trusting our work and letting us be part of your learning journey.
+                    </p>
+                    <p class="welcome-links">
+                        <a href="https://cruze-tech.com" target="_blank" rel="noopener noreferrer">cruze-tech.com</a>
+                        <span>•</span>
+                        <a href="https://games.cruze-tech.com" target="_blank" rel="noopener noreferrer">games.cruze-tech.com</a>
+                    </p>
+                </div>
+
+                <div class="settings-actions">
+                    <button id="btn-welcome-start" class="btn btn-secondary">Start Exploring</button>
                 </div>
             </div>
         </div>

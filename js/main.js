@@ -7,8 +7,19 @@ import './svgFactory.js';
 import './game.js';
 import './ui.js';
 
-const APP_VERSION = '3.0.0';
+const APP_VERSION = '3.1.0';
 const SW_UPDATE_EVENT = 'sw-update-available';
+const PWA_INSTALL_AVAILABILITY_EVENT = 'pwa-install-availability';
+const PWA_INSTALL_REQUEST_EVENT = 'pwa-install-request';
+const PWA_INSTALL_RESULT_EVENT = 'pwa-install-result';
+
+let deferredInstallPrompt = null;
+
+function dispatchInstallAvailability() {
+    window.dispatchEvent(new CustomEvent(PWA_INSTALL_AVAILABILITY_EVENT, {
+        detail: { canInstall: Boolean(deferredInstallPrompt) }
+    }));
+}
 
 function getUpdateBannerElements() {
     const banner = document.getElementById('sw-update-banner');
@@ -71,4 +82,43 @@ function registerServiceWorker() {
     });
 }
 
+function registerInstallLifecycle() {
+    window.addEventListener('beforeinstallprompt', (event) => {
+        event.preventDefault();
+        deferredInstallPrompt = event;
+        dispatchInstallAvailability();
+    });
+
+    window.addEventListener('appinstalled', () => {
+        deferredInstallPrompt = null;
+        localStorage.setItem('wordSafari_pwa_installed', 'yes');
+        dispatchInstallAvailability();
+    });
+
+    window.addEventListener(PWA_INSTALL_REQUEST_EVENT, async () => {
+        if (!deferredInstallPrompt) {
+            dispatchInstallAvailability();
+            return;
+        }
+
+        try {
+            deferredInstallPrompt.prompt();
+            const choice = await deferredInstallPrompt.userChoice;
+            window.dispatchEvent(new CustomEvent(PWA_INSTALL_RESULT_EVENT, {
+                detail: { outcome: choice.outcome }
+            }));
+        } catch (error) {
+            console.error('PWA install prompt failed:', error);
+        } finally {
+            deferredInstallPrompt = null;
+            dispatchInstallAvailability();
+        }
+    });
+
+    window.addEventListener('load', () => {
+        dispatchInstallAvailability();
+    });
+}
+
 registerServiceWorker();
+registerInstallLifecycle();

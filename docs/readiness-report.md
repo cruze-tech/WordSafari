@@ -1,10 +1,10 @@
 # Word Safari Readiness Report
 
 Date: 2026-02-25
-Scope: Critical hardening implementation (architecture, PWA, SVG rendering, persistence migration, release tests)
+Scope: Critical hardening + UI flow hardening (settings panel, welcome/install panel, release tests)
 
 ## Executive Verdict
-- Readiness score: **91 / 100**
+- Readiness score: **93 / 100**
 - Critical failures: **0**
 - Go-live threshold: **85 / 100 + zero critical failures**
 - Status: **Ready for controlled production rollout**
@@ -16,6 +16,7 @@ Scope: Critical hardening implementation (architecture, PWA, SVG rendering, pers
   - `pwa`: passed
   - `offline`: passed
   - `migration`: passed
+  - `uiflow`: passed
 
 ## Rubric Scoring
 1. Architecture integrity (20): **19/20**
@@ -39,11 +40,12 @@ Scope: Critical hardening implementation (architecture, PWA, SVG rendering, pers
 - Difficulty persistence now loaded on startup.
 - Legacy achievements storage migrated to versioned object shape.
 
-5. Test coverage and repeatability (15): **13/15**
+5. Test coverage and repeatability (15): **14/15**
 - Dedicated scripts: `test:smoke`, `test:pwa`, `test:offline`, `test:migration`, `test:readiness`.
 - Browser path discovery and `CHROME_PATH` support added.
+- UI flow checks now included (`uiflow`) for welcome/settings modal behavior.
 
-6. Accessibility/performance hygiene (5): **3/5**
+6. Accessibility/performance hygiene (5): **4/5**
 - Reduced-motion support added for heavy animations/confetti.
 - Remaining gap: no automated a11y audit tooling yet.
 
@@ -55,12 +57,15 @@ Scope: Critical hardening implementation (architecture, PWA, SVG rendering, pers
 - Sentence Builder inline styles moved to CSS classes.
 - Duplicate keyframes removed from stylesheet.
 - Progression migration and durability improvements implemented.
+- Settings panel added with persistent audio/reduced-motion controls.
+- Welcome panel added for install guidance and first-run UX messaging.
 - Release test harness expanded and scripted.
 
 ## Residual Risks (Non-Critical)
 - Manual iOS installability and standalone behavior were not executed in this environment.
 - Lighthouse PWA/perf scoring not yet automated in CI.
 - SVG visual regression snapshots are not yet part of automated tests.
+- Git remote hygiene still needs cleanup if `node_modules` remains tracked in your branch history.
 
 ## Recommended Next Verification Pass (Pre-Public Launch)
 1. Run mobile install checks on real iOS and Android devices.

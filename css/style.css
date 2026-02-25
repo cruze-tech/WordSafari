@@ -1157,6 +1157,110 @@ body {
     opacity: 0.75;
 }
 
+.settings-card {
+    max-width: 560px;
+}
+
+.settings-group {
+    margin-bottom: var(--spacing-md);
+}
+
+.settings-group label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.settings-group input[type="range"] {
+    width: 100%;
+    accent-color: var(--color-primary);
+}
+
+.settings-toggle-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-sm);
+    padding: 10px 12px;
+    background: var(--color-light);
+    border-radius: 12px;
+}
+
+.settings-toggle-row label {
+    font-weight: 600;
+}
+
+.settings-toggle-row input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--color-primary);
+}
+
+.settings-actions {
+    margin-top: var(--spacing-md);
+    display: flex;
+    justify-content: center;
+}
+
+.welcome-card {
+    max-width: 700px;
+}
+
+.welcome-intro {
+    line-height: 1.6;
+    margin-bottom: var(--spacing-md);
+    font-size: 1.05rem;
+}
+
+.welcome-install-panel {
+    background: var(--color-light);
+    border-radius: 14px;
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    text-align: center;
+}
+
+.welcome-install-status {
+    margin-top: var(--spacing-sm);
+    font-size: 0.92rem;
+    opacity: 0.78;
+}
+
+.welcome-heartfelt {
+    border-left: 4px solid var(--color-primary);
+    padding-left: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.welcome-heartfelt h3 {
+    margin-bottom: 8px;
+    color: var(--color-dark);
+}
+
+.welcome-heartfelt p {
+    line-height: 1.5;
+    margin-bottom: 8px;
+}
+
+.welcome-links {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.welcome-links a {
+    color: var(--color-primary);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.welcome-links a:hover {
+    text-decoration: underline;
+}
+
 /* ========== PAUSE MENU ========== */
 .pause-menu {
     max-width: 500px;
@@ -1386,6 +1490,18 @@ body {
         align-items: flex-start;
         bottom: var(--spacing-sm);
     }
+
+    .settings-toggle-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .welcome-links {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
 }
 
 @media (max-width: 420px) {
@@ -1446,6 +1562,25 @@ body {
     .confetti-particle {
         display: none !important;
     }
+}
+
+body.reduced-motion .animal-card,
+body.reduced-motion .animal-card.idle-blink svg,
+body.reduced-motion .animal-card.idle-breathe svg,
+body.reduced-motion .animal-card.idle-wiggle,
+body.reduced-motion .combo-counter,
+body.reduced-motion .feedback-popup,
+body.reduced-motion .achievement-toast,
+body.reduced-motion .unlocked-achievement,
+body.reduced-motion .modal,
+body.reduced-motion .modal-content,
+body.reduced-motion .screen {
+    animation: none !important;
+    transition: none !important;
+}
+
+body.reduced-motion .confetti-particle {
+    display: none !important;
 }
 
 /* ========== KEYFRAMES ========== */
