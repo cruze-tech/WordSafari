@@ -26,17 +26,17 @@ export const ANIMALS = [
   // Savanna
   {
     id: 'lion', name: 'Lion', biome: 'savanna', size: 'large', attributes: ['brave', 'strong', 'predator', 'mane', 'roar', 'fast'],
-    svg: svgWrap(`<path d="M50 25a20 20 0 1 0 0 40 20 20 0 0 0 0-40z" fill="#d89c3d"/><circle cx="42" cy="48" r="4"/><circle cx="58" cy="48" r="4"/>`, '#d89c3d'),
+    svg: svgWrap(`<path d="M50 15a25 25 0 1 0 0 50 25 25 0 0 0 0-50z" fill="#b06d1a"/><circle cx="50" cy="40" r="18" fill="#d89c3d"/><circle cx="42" cy="38" r="3" fill="#333"/><circle cx="58" cy="38" r="3" fill="#333"/><path d="M50 45 Q45 50 50 55 Q55 50 50 45" fill="#333"/>`, '#d89c3d'),
     facts: { habitat: 'Savanna', diet: 'Carnivore', status: 'Vulnerable', description: 'Lions live in groups called prides and are powerful hunters.' }
   },
   {
     id: 'elephant', name: 'Elephant', biome: 'savanna', size: 'large', attributes: ['gray', 'big', 'trunk', 'herbivore', 'gentle', 'intelligent'],
-    svg: svgWrap(`<ellipse cx="50" cy="55" rx="28" ry="22" fill="#b6b6b6"/><rect x="60" y="40" width="12" height="28" rx="6" fill="#b6b6b6"/>`, '#b6b6b6'),
+    svg: svgWrap(`<ellipse cx="30" cy="40" rx="15" ry="25" fill="#999"/><ellipse cx="70" cy="40" rx="15" ry="25" fill="#999"/><ellipse cx="50" cy="45" rx="22" ry="20" fill="#b6b6b6"/><rect x="44" y="55" width="12" height="30" rx="6" fill="#b6b6b6"/><circle cx="42" cy="40" r="2" fill="#333"/><circle cx="58" cy="40" r="2" fill="#333"/>`, '#b6b6b6'),
     facts: { habitat: 'Savanna', diet: 'Herbivore', status: 'Endangered', description: 'Largest land mammal with a trunk used for grasping.' }
   },
   {
     id: 'giraffe', name: 'Giraffe', biome: 'savanna', size: 'large', attributes: ['tall', 'spotted', 'long-neck', 'herbivore', 'gentle'],
-    svg: svgWrap(`<rect x="46" y="25" width="8" height="40" fill="#d9b36c"/><circle cx="50" cy="30" r="10" fill="#d9b36c"/>`, '#d9b36c'),
+    svg: svgWrap(`<rect x="42" y="20" width="16" height="50" fill="#d9b36c" rx="8"/><circle cx="50" cy="20" r="14" fill="#d9b36c"/><circle cx="46" cy="18" r="2" fill="#333"/><circle cx="54" cy="18" r="2" fill="#333"/><circle cx="46" cy="35" r="4" fill="#a07a48"/><circle cx="54" cy="50" r="5" fill="#a07a48"/>`, '#d9b36c'),
     facts: { habitat: 'Savanna', diet: 'Herbivore', status: 'Vulnerable', description: 'Tallest animal, uses long neck to reach leaves.' }
   },
   {
