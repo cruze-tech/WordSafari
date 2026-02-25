@@ -1,0 +1,22 @@
+{
+  "name": "Word Safari: Vocabulary Hunt",
+  "short_name": "Word Safari",
+  "description": "An engaging edutainment game designed to teach children vocabulary, spelling, and animal facts through interactive safari adventures.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#FF8C42",
+  "theme_color": "#FFD93D",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAA7AAAAOwBeShxvQAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAKkSURBVFiFzZdNaBNBFMd/b5JNGpM0aU1jPxKLYKEgCIIHQfDgQRBBEDx48OBBEDx48OBBEDx48OBBEDx48OBBEDx48OBBEDx48OBBEDx4qFpbbdM0zSbZnRkPu5vdJJvN7kf/h2V23ry/b+bNmzcD/zMUAFprpJRYlkWxWKRQKFAoFCgWi1iWhZQSrTVSSrTWKKVQSqGUQimFUgqtNUoplFJIKdFao7VGa43WGq01Wmu01mitUUqhlEIphdYarTVaa7TWaK1RSqGUQimF1hqtNVprtNZordFao7VGKYVSCqUUWmuklGitkVKitUZKiZQSKSVSSpRSKKVQSqG1RkqJlBIpJVJKpJRIKZFSopRCKYVSCqUUSim01kgpkVIipURKiZQSKSVKKZRSKKVQSqGUQmuNlBIpJVJKpJRIKVFKoZRCKYVSCqUUWmuklEgpkVIipURKiVIKpRRKKZRSKKXQWiOlREqJlBIpJVJKlFIopVBKoZRCa42UEiklUkqklEgpUUqhlEIphVIKrTVSSpRSKKVQSqGUQimFUgqlFEoplFIopVBKoZRCKYVSCqUUSim01iilUEqhlEIphVIKpRRKKZRSKKVQSqGUQimFUgqlFEoplFIopVBKoZRCKYVSCqUUSim01iilUEqhlEIphVIKpRRKKZRSKKVQSqGUQimFUgqlFEoplFIopVBKoZRCKYVSCqUUSim01iilUEqhlEIphVIKpRRKKZRSKKVQSqGUQimFUgqlFEoplFIopVBKoZRCKYVSCq01SimUUiilUEqhlEIphVIKpRRKKZRSKKVQSqGUQimFUgqlFEoplFIopVBKoZRCKYVSCqUUWmuUUiilUEqhlEIphVIKpRRKKZRSKKVQSqGUQimFUgqlFEoplFIopVBKoZRCKYVSCqUU/wCxwXC8YGxzFwAAAABJRU5ErkJggg==",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAYAAAA9zQYyAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEwAACxMBAJqcGAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAA==",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
