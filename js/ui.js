@@ -13,7 +13,6 @@ import { progressionManager } from './progression.js';
 class UIManager {
     constructor() {
         this.uiSettingsKey = 'wordSafari_ui_settings';
-        this.welcomeSeenKey = 'wordSafari_welcome_seen_v3';
         this.returnToPauseAfterSettings = false;
         this.canInstallPwa = false;
         this.uiSettings = this.loadUISettings();
@@ -81,11 +80,6 @@ class UIManager {
         document.getElementById('btn-open-settings')?.addEventListener('click', () => {
             playSound('click');
             this.showSettings(false);
-        });
-
-        document.getElementById('btn-welcome')?.addEventListener('click', () => {
-            playSound('click');
-            this.showWelcomePanel(true);
         });
 
         // Difficulty selector
@@ -458,25 +452,17 @@ class UIManager {
         this.returnToPauseAfterSettings = false;
     }
 
-    showWelcomePanel(userInitiated = false) {
-        if (!userInitiated) {
-            localStorage.setItem(this.welcomeSeenKey, 'yes');
-        }
-
+    showWelcomePanel() {
         this.updateWelcomeInstallState();
         document.getElementById('welcome-modal')?.classList.add('active');
     }
 
     hideWelcomePanel() {
-        localStorage.setItem(this.welcomeSeenKey, 'yes');
         document.getElementById('welcome-modal')?.classList.remove('active');
     }
 
     maybeShowWelcomePanel() {
-        const seenWelcome = localStorage.getItem(this.welcomeSeenKey) === 'yes';
-        if (!seenWelcome) {
-            this.showWelcomePanel(false);
-        }
+        this.showWelcomePanel();
     }
 
     showSpellingBee() {
@@ -581,6 +567,7 @@ class UIManager {
    ======================================== */
 const uiManager = new UIManager();
 window.uiManager = uiManager;
+uiManager.maybeShowWelcomePanel();
 
 window.addEventListener('resize', () => uiManager.updateLayout());
 window.addEventListener('load', () => {
@@ -588,7 +575,6 @@ window.addEventListener('load', () => {
     uiManager.updateStatsDisplay();
     uiManager.syncSettingsPanelState();
     uiManager.updateWelcomeInstallState();
-    uiManager.maybeShowWelcomePanel();
 });
 
 // Prevent default behaviors
