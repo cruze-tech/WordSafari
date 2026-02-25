@@ -88,6 +88,7 @@
                 <button id="btn-play" class="btn btn-primary">🎮 Start Adventure</button>
                 <button id="btn-spelling" class="btn btn-secondary">🐝 Spelling Bee</button>
                 <button id="btn-daily" class="btn btn-info">⏱️ Daily Quest</button>
+                <button id="btn-sentence" class="btn btn-primary">🧩 Sentence Builder</button>
                 <button id="btn-achievements" class="btn btn-small">🏆 Achievements</button>
                 <button id="btn-instructions" class="btn btn-small">📖 How to Play</button>
             </div>
@@ -171,6 +172,36 @@
                 <div id="answer-options" class="answer-options"></div>
                 <div class="daily-progress">
                     Question <span id="daily-current">1</span> of <span id="daily-total">5</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 🧩 Sentence Builder Screen -->
+        <div id="sentence-screen" class="screen">
+            <button class="btn-back" id="btn-back-sentence">← Back</button>
+            <h2 class="screen-title">🧩 Sentence Builder</h2>
+            <div class="spelling-container">
+                <div class="sentence-animal-box" id="sentence-animal-svg" style="text-align:center; height:120px; display:flex; justify-content:center; align-items:center;"></div>
+                <div class="sentence-drop-zone" id="sentence-drop-zone" style="font-size: 1.5rem; text-align: center; margin: 20px 0; font-weight: bold; background: #f8f9fa; padding: 20px; border-radius: 15px; border: 2px dashed var(--color-primary); display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; align-items: center;">
+                    <span>The</span>
+                    <div class="drop-slot" data-expected="name" id="slot-name" style="min-width: 100px; border-bottom: 3px solid #ccc; color: var(--color-primary); padding: 5px;">?</div>
+                    <span>is a</span>
+                    <div class="drop-slot" data-expected="adjective" id="slot-adjective" style="min-width: 100px; border-bottom: 3px solid #ccc; color: var(--color-primary); padding: 5px;">?</div>
+                    <div class="drop-slot" data-expected="category" id="slot-category" style="min-width: 100px; border-bottom: 3px solid #ccc; color: var(--color-primary); padding: 5px;">?</div>
+                    <span>.</span>
+                </div>
+                
+                <h3 style="text-align: center; margin-bottom: 10px; opacity: 0.7;">Word Bank</h3>
+                <div class="word-bank" id="word-bank" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 20px;"></div>
+                
+                <div class="spelling-buttons">
+                    <button id="btn-check-sentence" class="btn btn-primary">✓ Check</button>
+                    <button id="btn-sentence-skip" class="btn btn-secondary">→ Skip</button>
+                </div>
+                <div id="sentence-feedback" class="spelling-feedback"></div>
+                <div class="spelling-score">
+                    <span>✓ Correct: <strong id="sentence-correct">0</strong></span>
+                    <span>✗ Wrong: <strong id="sentence-wrong">0</strong></span>
                 </div>
             </div>
         </div>

@@ -2,7 +2,7 @@
  * 🎨 Word Safari: Enhanced UI Management
  */
 
-import { gameManager, spellingBeeManager, dailyQuestManager } from './game.js';
+import { gameManager, spellingBeeManager, dailyQuestManager, sentenceBuilderManager } from './game.js';
 import { playSound, toggleMute } from './audio.js';
 import { achievementManager } from './achievements.js';
 import { progressionManager } from './progression.js';
@@ -13,7 +13,7 @@ import { progressionManager } from './progression.js';
 class UIManager {
     constructor() {
         this.currentScreen = 'start';
-        this.screens = ['start', 'game', 'spelling', 'daily', 'end'];
+        this.screens = ['start', 'game', 'spelling', 'daily', 'sentence', 'end'];
         this.initializeEventListeners();
         this.updateStatsDisplay();
     }
@@ -33,6 +33,11 @@ class UIManager {
         document.getElementById('btn-daily')?.addEventListener('click', () => {
             playSound('click');
             this.showDailyQuest();
+        });
+
+        document.getElementById('btn-sentence')?.addEventListener('click', () => {
+            playSound('click');
+            this.showSentenceBuilder();
         });
 
         document.getElementById('btn-achievements')?.addEventListener('click', () => {
@@ -154,6 +159,23 @@ class UIManager {
             this.updateStatsDisplay();
         });
 
+        // Sentence Builder
+        document.getElementById('btn-check-sentence')?.addEventListener('click', () => {
+            playSound('click');
+            sentenceBuilderManager.checkSentence();
+        });
+
+        document.getElementById('btn-sentence-skip')?.addEventListener('click', () => {
+            playSound('click');
+            sentenceBuilderManager.skipSentence();
+        });
+
+        document.getElementById('btn-back-sentence')?.addEventListener('click', () => {
+            playSound('click');
+            this.showScreen('start');
+            this.updateStatsDisplay();
+        });
+
         // End screen
         document.getElementById('btn-play-again')?.addEventListener('click', () => {
             playSound('click');
@@ -193,7 +215,7 @@ class UIManager {
 
     updateStatsDisplay() {
         const stats = progressionManager.getStats();
-        
+
         document.getElementById('stat-high-score').textContent = stats.highScore;
         document.getElementById('stat-animals').textContent = stats.animalsDiscovered;
         document.getElementById('stat-streak').textContent = stats.dayStreak;
@@ -241,6 +263,11 @@ class UIManager {
         dailyQuestManager.startDailyQuest();
     }
 
+    showSentenceBuilder() {
+        this.showScreen('sentence');
+        sentenceBuilderManager.start();
+    }
+
     showAchievements() {
         achievementManager.renderGrid();
         document.getElementById('achievements-modal').classList.add('active');
@@ -252,7 +279,7 @@ class UIManager {
 
     showEndScreen(score, level, stars, xpEarned, newAchievements = []) {
         this.showScreen('end');
-        
+
         document.getElementById('end-score').textContent = score;
         document.getElementById('end-level').textContent = level;
         document.getElementById('end-stars').textContent = '⭐'.repeat(stars);
@@ -273,7 +300,7 @@ class UIManager {
                     </div>
                 </div>
             `).join('');
-            
+
             // Show notifications
             newAchievements.forEach((ach, index) => {
                 setTimeout(() => achievementManager.showNotification(ach), index * 1000);

@@ -30,17 +30,17 @@ class GameManager {
     startGame() {
         this.resetGame();
         progressionManager.resetSessionStats();
-        
+
         // Apply difficulty settings
         const difficulty = progressionManager.getDifficultySettings();
         this.timeRemaining = Math.floor(60 * difficulty.timeMultiplier);
-        
+
         this.generateClue();
         this.spawnAnimals();
         this.startTimer();
         this.updateDifficultyBadge();
         playSound('ambient', true);
-        
+
         this.startTime = Date.now();
         this.levelStartTime = Date.now();
     }
@@ -124,7 +124,7 @@ class GameManager {
     spawnAnimals() {
         const gameArea = document.getElementById('game-area');
         if (!gameArea) return;
-        
+
         gameArea.innerHTML = '';
         this.spawnedAnimals = [];
 
@@ -140,7 +140,7 @@ class GameManager {
         const numCorrect = Math.min(2, this.correctAnimals.length);
         const correctToSpawn = this.correctAnimals.slice(0, numCorrect);
 
-        const wrongAnimals = getRandomAnimals(4, this.biome).filter(a => 
+        const wrongAnimals = getRandomAnimals(4, this.biome).filter(a =>
             !this.correctAnimals.some(ca => ca.id === a.id)
         );
 
@@ -148,18 +148,16 @@ class GameManager {
 
         allAnimals.forEach((animal, index) => {
             const animalElement = this.createAnimalElement(animal);
-            animalElement.style.left = `${10 + (index * 15)}%`;
-            animalElement.style.top = `${35 + Math.random() * 35}%`;
-            animalElement.style.animationDelay = `${index * 0.3}s`;
-            
+            animalElement.style.animationDelay = `${index * 0.15}s`;
+
             // Add size class
             animalElement.classList.add(animal.size || 'medium');
-            
+
             // Add random idle animation
             const idleAnimations = ['idle-blink', 'idle-breathe', 'idle-wiggle'];
             const randomIdle = idleAnimations[Math.floor(Math.random() * idleAnimations.length)];
             animalElement.classList.add(randomIdle);
-            
+
             gameArea.appendChild(animalElement);
             this.spawnedAnimals.push({ element: animalElement, animal });
         });
@@ -177,7 +175,7 @@ class GameManager {
         container.appendChild(label);
 
         container.addEventListener('click', () => this.handleAnimalClick(animal, container));
-        
+
         return container;
     }
 
@@ -190,7 +188,7 @@ class GameManager {
         if (isCorrect) {
             this.correctStreak++;
             this.score += 10 * this.level * (this.correctStreak > 1 ? this.correctStreak : 1);
-            
+
             playSound('correct');
             this.showFeedback(true, element);
             this.showComboCounter(this.correctStreak);
@@ -209,7 +207,7 @@ class GameManager {
                 element.remove();
                 this.spawnedAnimals = this.spawnedAnimals.filter(sa => sa.element !== element);
 
-                const remainingCorrect = this.spawnedAnimals.filter(sa => 
+                const remainingCorrect = this.spawnedAnimals.filter(sa =>
                     this.correctAnimals.some(ca => ca.id === sa.animal.id)
                 );
 
@@ -224,10 +222,10 @@ class GameManager {
             this.showFeedback(false, element);
             this.hideComboCounter();
             element.classList.add('shake');
-            
+
             // Record performance
             progressionManager.recordPerformance(false, clickTime);
-            
+
             setTimeout(() => element.classList.remove('shake'), 500);
         }
 
@@ -239,7 +237,7 @@ class GameManager {
 
     showComboCounter(combo) {
         if (combo < 2) return;
-        
+
         const counter = document.getElementById('combo-counter');
         if (counter) {
             counter.classList.remove('hidden');
@@ -258,7 +256,7 @@ class GameManager {
     createConfetti(element) {
         const rect = element.getBoundingClientRect();
         const colors = ['#FF8C42', '#FFD93D', '#6BCF7F', '#87CEEB'];
-        
+
         for (let i = 0; i < 10; i++) {
             const confetti = document.createElement('div');
             confetti.className = 'confetti-particle';
@@ -267,7 +265,7 @@ class GameManager {
             confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
             confetti.style.animationDelay = `${i * 0.05}s`;
             document.body.appendChild(confetti);
-            
+
             setTimeout(() => confetti.remove(), 2000);
         }
     }
@@ -291,7 +289,7 @@ class GameManager {
         if (statusEl) statusEl.textContent = animal.facts.status || '';
 
         modal.classList.add('active');
-        
+
         progressionManager.recordFactRead();
     }
 
@@ -327,7 +325,7 @@ class GameManager {
 
     startTimer() {
         clearInterval(this.timerInterval); // Clear any existing timer
-        
+
         this.timerInterval = setInterval(() => {
             if (!this.isPlaying) return;
 
@@ -343,7 +341,7 @@ class GameManager {
     nextRound() {
         this.score += 20;
         progressionManager.stats.levelsInSession++;
-        
+
         if (this.score >= this.level * 100) {
             this.levelUp();
         }
@@ -379,9 +377,9 @@ class GameManager {
 
         // Record game completion
         const { xpEarned } = progressionManager.recordGameComplete(
-            this.score, 
-            this.level, 
-            totalTime, 
+            this.score,
+            this.level,
+            totalTime,
             this.mistakes
         );
 
@@ -426,9 +424,9 @@ class SpellingBeeManager {
         const easy = spellingWords.easy || [];
         const medium = spellingWords.medium || [];
         const hard = spellingWords.hard || [];
-        
+
         this.wordQueue = [...easy, ...medium, ...hard].sort(() => Math.random() - 0.5);
-        
+
         // Fallback if no words available
         if (this.wordQueue.length === 0) {
             console.error('No spelling words available!');
@@ -445,11 +443,11 @@ class SpellingBeeManager {
         }
 
         this.currentWord = this.wordQueue.pop();
-        
+
         const hintEl = document.getElementById('spelling-hint');
         const inputEl = document.getElementById('spelling-input');
         const feedbackEl = document.getElementById('spelling-feedback');
-        
+
         if (hintEl) hintEl.textContent = this.currentWord.hint;
         if (inputEl) inputEl.value = '';
         if (feedbackEl) {
@@ -461,7 +459,7 @@ class SpellingBeeManager {
     checkSpelling() {
         const inputEl = document.getElementById('spelling-input');
         const feedbackEl = document.getElementById('spelling-feedback');
-        
+
         if (!inputEl || !feedbackEl) return;
 
         const input = inputEl.value.trim().toLowerCase();
@@ -471,22 +469,22 @@ class SpellingBeeManager {
             feedbackEl.textContent = `🎉 Correct! "${this.currentWord.word}" is spelled right!`;
             feedbackEl.className = 'spelling-feedback correct';
             playSound('correct');
-            
+
             // Record spelling progress
             progressionManager.recordSpellingWord(true);
-            
+
             // Check achievements
             const stats = progressionManager.getStats();
             const newAchievements = achievementManager.checkAchievements(stats);
             newAchievements.forEach(ach => achievementManager.showNotification(ach));
-            
+
             setTimeout(() => this.nextWord(), 2000);
         } else {
             this.wrongCount++;
             feedbackEl.textContent = `❌ Oops! Try again or skip to see the answer.`;
             feedbackEl.className = 'spelling-feedback wrong';
             playSound('wrong');
-            
+
             progressionManager.recordSpellingWord(false);
         }
 
@@ -499,7 +497,7 @@ class SpellingBeeManager {
             feedbackEl.textContent = `The correct spelling is: ${this.currentWord.word}`;
             feedbackEl.className = 'spelling-feedback';
         }
-        
+
         setTimeout(() => this.nextWord(), 2000);
     }
 
@@ -512,7 +510,7 @@ class SpellingBeeManager {
     updateStats() {
         const correctEl = document.getElementById('spelling-correct');
         const wrongEl = document.getElementById('spelling-wrong');
-        
+
         if (correctEl) correctEl.textContent = this.correctCount;
         if (wrongEl) wrongEl.textContent = this.wrongCount;
     }
@@ -542,10 +540,10 @@ class DailyQuestManager {
         this.correctAnswers = 0;
         this.timeRemaining = 30;
         clearInterval(this.timerInterval);
-        
+
         const timerEl = document.getElementById('daily-timer');
         if (timerEl) timerEl.textContent = this.timeRemaining;
-        
+
         this.updateProgress();
     }
 
@@ -563,7 +561,7 @@ class DailyQuestManager {
 
         const optionsContainer = document.getElementById('answer-options');
         if (!optionsContainer) return;
-        
+
         optionsContainer.innerHTML = '';
 
         question.options.forEach((option, index) => {
@@ -601,10 +599,10 @@ class DailyQuestManager {
 
     startTimer() {
         clearInterval(this.timerInterval); // Clear any existing timer
-        
+
         this.timerInterval = setInterval(() => {
             this.timeRemaining--;
-            
+
             const timerEl = document.getElementById('daily-timer');
             if (timerEl) timerEl.textContent = this.timeRemaining;
 
@@ -617,20 +615,20 @@ class DailyQuestManager {
     updateProgress() {
         const currentEl = document.getElementById('daily-current');
         const totalEl = document.getElementById('daily-total');
-        
+
         if (currentEl) currentEl.textContent = this.currentQuestionIndex + 1;
         if (totalEl) totalEl.textContent = this.questions.length;
     }
 
     endQuest() {
         clearInterval(this.timerInterval);
-        
+
         progressionManager.recordDailyQuestComplete();
-        
+
         const stats = progressionManager.getStats();
         const newAchievements = achievementManager.checkAchievements(stats);
         newAchievements.forEach(ach => achievementManager.showNotification(ach));
-        
+
         const score = this.correctAnswers * 20;
         setTimeout(() => {
             alert(`Daily Quest Complete!\n✓ Correct: ${this.correctAnswers}/${this.questions.length}\n🏆 Score: ${score}\n⭐ +30 XP Earned!`);
@@ -643,8 +641,152 @@ class DailyQuestManager {
 }
 
 /* ========================================
+   SENTENCE BUILDER MANAGER
+   ======================================== */
+class SentenceBuilderManager {
+    constructor() {
+        this.currentAnimal = null;
+        this.correctCount = 0;
+        this.wrongCount = 0;
+        this.slots = { name: null, adjective: null, category: null };
+    }
+
+    start() {
+        this.correctCount = 0;
+        this.wrongCount = 0;
+        this.nextSentence();
+        this.updateStats();
+    }
+
+    nextSentence() {
+        const pool = ANIMALS;
+        this.currentAnimal = pool[Math.floor(Math.random() * pool.length)];
+
+        // Reset slots
+        this.slots = { name: null, adjective: null, category: null };
+        document.querySelectorAll('.drop-slot').forEach(slot => {
+            slot.textContent = '?';
+            slot.style.color = 'var(--color-primary)';
+        });
+
+        // Find animal traits
+        const adjectives = this.currentAnimal.attributes.filter(a =>
+            !['herbivore', 'carnivore', 'omnivore', 'predator', 'mammal', 'reptile', 'amphibian', 'bird', 'fish', 'arachnid'].includes(a)
+        );
+        const categories = this.currentAnimal.attributes.filter(a =>
+            ['herbivore', 'carnivore', 'omnivore', 'predator', 'mammal', 'reptile', 'amphibian', 'bird', 'fish', 'arachnid'].includes(a)
+        );
+
+        const myAdj = adjectives.length > 0 ? adjectives[0] : 'amazing';
+        const myCat = categories.length > 0 ? categories[0] : 'animal';
+        const myName = this.currentAnimal.name;
+
+        // Store expected values on UI
+        document.getElementById('slot-name').dataset.expected = myName;
+        document.getElementById('slot-adjective').dataset.expected = myAdj;
+        document.getElementById('slot-category').dataset.expected = myCat;
+        document.getElementById('sentence-animal-svg').innerHTML = this.currentAnimal.svg;
+
+        // Generate word bank (mix correct with random)
+        const bank = [myName, myAdj, myCat];
+        const randomAnimals = getRandomAnimals(3).map(a => a.name).filter(n => n !== myName);
+        const distractors = ['blue', 'slow', 'tiny', 'giant', 'fluffy', 'scary', 'plant', 'bug'];
+        bank.push(...randomAnimals.slice(0, 2));
+        bank.push(distractors[Math.floor(Math.random() * distractors.length)]);
+        bank.push(distractors[Math.floor(Math.random() * distractors.length)]);
+
+        const wordBankEl = document.getElementById('word-bank');
+        wordBankEl.innerHTML = '';
+
+        bank.sort(() => Math.random() - 0.5).forEach(word => {
+            const btn = document.createElement('button');
+            btn.className = 'btn btn-small';
+            btn.textContent = word;
+            btn.onclick = () => this.selectWord(word, btn);
+            wordBankEl.appendChild(btn);
+        });
+
+        const feedbackEl = document.getElementById('sentence-feedback');
+        feedbackEl.textContent = '';
+        feedbackEl.className = 'spelling-feedback';
+    }
+
+    selectWord(word, btn) {
+        // Find first empty slot
+        let filled = false;
+        ['name', 'adjective', 'category'].forEach(key => {
+            if (!filled && !this.slots[key]) {
+                this.slots[key] = word;
+                document.getElementById(`slot-${key}`).textContent = word;
+                document.getElementById(`slot-${key}`).style.color = '#333';
+                btn.style.display = 'none'; // hide from bank
+                filled = true;
+            }
+        });
+        if (filled) playSound('click');
+        else playSound('wrong'); // User clicking when slots full
+    }
+
+    checkSentence() {
+        const expectedName = document.getElementById('slot-name').dataset.expected;
+        const expectedAdj = document.getElementById('slot-adjective').dataset.expected;
+        const expectedCat = document.getElementById('slot-category').dataset.expected;
+        const feedbackEl = document.getElementById('sentence-feedback');
+
+        const isCorrect =
+            this.slots.name === expectedName &&
+            this.slots.adjective === expectedAdj &&
+            this.slots.category === expectedCat;
+
+        if (isCorrect) {
+            this.correctCount++;
+            feedbackEl.textContent = '🎉 Perfect Sentence!';
+            feedbackEl.className = 'spelling-feedback correct';
+            playSound('correct');
+            // Add some XP
+            progressionManager.addXP(15);
+            setTimeout(() => this.nextSentence(), 1500);
+        } else {
+            this.wrongCount++;
+            feedbackEl.textContent = '❌ Not quite right. Try again!';
+            feedbackEl.className = 'spelling-feedback wrong';
+            playSound('wrong');
+            // reset slots
+            this.slots = { name: null, adjective: null, category: null };
+            document.querySelectorAll('.drop-slot').forEach(slot => {
+                slot.textContent = '?';
+                slot.style.color = 'var(--color-primary)';
+            });
+            // Show all buttons again
+            document.querySelectorAll('#word-bank .btn').forEach(b => b.style.display = 'inline-block');
+        }
+        this.updateStats();
+    }
+
+    skipSentence() {
+        const expectedName = document.getElementById('slot-name').dataset.expected;
+        const expectedAdj = document.getElementById('slot-adjective').dataset.expected;
+        const expectedCat = document.getElementById('slot-category').dataset.expected;
+        const feedbackEl = document.getElementById('sentence-feedback');
+
+        feedbackEl.textContent = `Answer: The ${expectedName} is a ${expectedAdj} ${expectedCat}.`;
+        feedbackEl.className = 'spelling-feedback';
+
+        setTimeout(() => this.nextSentence(), 3000);
+    }
+
+    updateStats() {
+        const curEl = document.getElementById('sentence-correct');
+        const wrEl = document.getElementById('sentence-wrong');
+        if (curEl) curEl.textContent = this.correctCount;
+        if (wrEl) wrEl.textContent = this.wrongCount;
+    }
+}
+
+/* ========================================
    EXPORT & INITIALIZE
    ======================================== */
 export const gameManager = new GameManager();
 export const spellingBeeManager = new SpellingBeeManager();
 export const dailyQuestManager = new DailyQuestManager();
+export const sentenceBuilderManager = new SentenceBuilderManager();
