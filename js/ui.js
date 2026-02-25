@@ -15,6 +15,7 @@ class UIManager {
         this.currentScreen = 'start';
         this.screens = ['start', 'game', 'spelling', 'daily', 'sentence', 'end'];
         this.initializeEventListeners();
+        this.syncDifficultyButtons();
         this.updateStatsDisplay();
     }
 
@@ -122,6 +123,17 @@ class UIManager {
             document.getElementById('fact-modal').classList.remove('active');
         });
 
+        // Daily Quest result modal
+        document.getElementById('daily-result-close')?.addEventListener('click', () => {
+            playSound('click');
+            this.hideDailyQuestResult();
+        });
+
+        document.getElementById('btn-daily-result-ok')?.addEventListener('click', () => {
+            playSound('click');
+            this.hideDailyQuestResult();
+        });
+
         // Spelling bee
         document.getElementById('btn-play-word')?.addEventListener('click', () => {
             playSound('click');
@@ -222,6 +234,13 @@ class UIManager {
         document.getElementById('stat-level').textContent = stats.playerLevel;
     }
 
+    syncDifficultyButtons() {
+        const difficulty = progressionManager.getDifficulty();
+        document.querySelectorAll('.difficulty-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.difficulty === difficulty);
+        });
+    }
+
     showScreen(name) {
         this.screens.forEach(s => {
             const el = document.getElementById(`${s}-screen`);
@@ -261,6 +280,24 @@ class UIManager {
     showDailyQuest() {
         this.showScreen('daily');
         dailyQuestManager.startDailyQuest();
+    }
+
+    showDailyQuestResult(correct, total, score) {
+        this.showScreen('start');
+        this.updateStatsDisplay();
+
+        const modal = document.getElementById('daily-result-modal');
+        const scoreEl = document.getElementById('daily-result-score');
+        const ratioEl = document.getElementById('daily-result-ratio');
+
+        if (scoreEl) scoreEl.textContent = score;
+        if (ratioEl) ratioEl.textContent = `${correct}/${total}`;
+        if (modal) modal.classList.add('active');
+    }
+
+    hideDailyQuestResult() {
+        const modal = document.getElementById('daily-result-modal');
+        if (modal) modal.classList.remove('active');
     }
 
     showSentenceBuilder() {

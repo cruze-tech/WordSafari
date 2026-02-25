@@ -1,4 +1,13 @@
 {
+  "name": "WordSafari",
+  "private": true,
+  "scripts": {
+    "test:smoke": "node test.js --scenario=smoke",
+    "test:pwa": "node test.js --scenario=pwa",
+    "test:offline": "node test.js --scenario=offline",
+    "test:migration": "node test.js --scenario=migration",
+    "test:readiness": "node test.js --scenario=readiness"
+  },
   "dependencies": {
     "puppeteer-core": "^24.37.5"
   }

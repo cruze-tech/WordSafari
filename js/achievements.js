@@ -5,6 +5,8 @@
 
 export class AchievementManager {
     constructor() {
+        this.storageKey = 'wordSafari_achievements';
+        this.schemaVersion = 2;
         this.achievements = [
             {
                 id: 'safari_starter',
@@ -171,25 +173,47 @@ export class AchievementManager {
         this.loadProgress();
     }
 
-    loadProgress() {
-        const saved = localStorage.getItem('wordSafari_achievements');
-        if (saved) {
-            const savedData = JSON.parse(saved);
-            this.achievements.forEach(achievement => {
-                const savedAch = savedData.find(a => a.id === achievement.id);
-                if (savedAch) {
-                    achievement.unlocked = savedAch.unlocked;
-                }
-            });
+    safeParse(raw) {
+        if (!raw || typeof raw !== 'string') return null;
+        try {
+            return JSON.parse(raw);
+        } catch (error) {
+            console.warn('Achievement data is corrupted, falling back to defaults.');
+            return null;
         }
     }
 
+    normalizeSavedData(savedData) {
+        if (!savedData) return [];
+        if (Array.isArray(savedData)) return savedData;
+        if (Array.isArray(savedData.achievements)) return savedData.achievements;
+        return [];
+    }
+
+    loadProgress() {
+        const raw = localStorage.getItem(this.storageKey);
+        const saved = this.safeParse(raw);
+        const savedData = this.normalizeSavedData(saved);
+
+        this.achievements.forEach(achievement => {
+            const savedAch = savedData.find(a => a.id === achievement.id);
+            if (savedAch) {
+                achievement.unlocked = Boolean(savedAch.unlocked);
+            }
+        });
+
+        this.saveProgress();
+    }
+
     saveProgress() {
-        const data = this.achievements.map(a => ({
-            id: a.id,
-            unlocked: a.unlocked
-        }));
-        localStorage.setItem('wordSafari_achievements', JSON.stringify(data));
+        const data = {
+            schemaVersion: this.schemaVersion,
+            achievements: this.achievements.map(a => ({
+                id: a.id,
+                unlocked: a.unlocked
+            }))
+        };
+        localStorage.setItem(this.storageKey, JSON.stringify(data));
     }
 
     checkAchievements(stats) {

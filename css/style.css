@@ -478,6 +478,17 @@ body {
     transition: all 0.3s ease;
 }
 
+.animal-svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    shape-rendering: geometricPrecision;
+}
+
+.animal-svg .svg-part {
+    transition: fill 0.25s ease, stroke 0.25s ease;
+}
+
 /* Idle animations for animals */
 .animal-card.idle-blink svg {
     animation: blink 5s ease-in-out infinite;
@@ -664,6 +675,51 @@ body {
     padding-top: var(--spacing-sm);
     border-top: 2px solid var(--color-light);
     font-size: 1.1rem;
+}
+
+.sentence-animal-box {
+    text-align: center;
+    height: 120px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.sentence-drop-zone {
+    font-size: 1.5rem;
+    text-align: center;
+    margin: 20px 0;
+    font-weight: 700;
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 15px;
+    border: 2px dashed var(--color-primary);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    align-items: center;
+}
+
+.drop-slot {
+    min-width: 100px;
+    border-bottom: 3px solid #ccc;
+    color: var(--color-primary);
+    padding: 5px;
+}
+
+.word-bank-title {
+    text-align: center;
+    margin-bottom: 10px;
+    opacity: 0.7;
+}
+
+.word-bank {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
 }
 
 #daily-screen {
@@ -939,109 +995,33 @@ body {
     color: var(--color-primary);
 }
 
-/* ========== NEW PREMIUM ANIMATIONS ========== */
-@keyframes slide-in-right {
-    from {
-        transform: translateX(50px);
-        opacity: 0;
-    }
-
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
+/* ========== SW UPDATE BANNER ========== */
+.sw-update-banner {
+    position: fixed;
+    left: 50%;
+    bottom: var(--spacing-lg);
+    transform: translateX(-50%);
+    width: min(92vw, 560px);
+    background: rgba(255, 255, 255, 0.97);
+    border: 2px solid var(--color-primary);
+    border-radius: 18px;
+    box-shadow: var(--shadow-xl);
+    padding: 12px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--spacing-sm);
+    z-index: 10001;
 }
 
-@keyframes bounce-in {
-    0% {
-        transform: scale(0.8);
-        opacity: 0;
-    }
-
-    60% {
-        transform: scale(1.05);
-        opacity: 1;
-    }
-
-    100% {
-        transform: scale(1);
-        opacity: 1;
-    }
+.sw-update-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-@keyframes wiggle {
-
-    0%,
-    100% {
-        transform: rotate(0deg);
-    }
-
-    25% {
-        transform: rotate(-5deg);
-    }
-
-    75% {
-        transform: rotate(5deg);
-    }
-}
-
-@keyframes float-up-down {
-
-    0%,
-    100% {
-        transform: translateY(0);
-    }
-
-    50% {
-        transform: translateY(-10px);
-    }
-}
-
-@keyframes blink {
-
-    0%,
-    96%,
-    98%,
-    100% {
-        transform: scaleY(1);
-    }
-
-    97%,
-    99% {
-        transform: scaleY(0.1);
-    }
-}
-
-@keyframes breathe {
-
-    0%,
-    100% {
-        transform: scale(1);
-    }
-
-    50% {
-        transform: scale(1.02);
-    }
-}
-
-@keyframes shake {
-
-    0%,
-    100% {
-        transform: translateX(0);
-    }
-
-    25% {
-        transform: translateX(-5px);
-    }
-
-    50% {
-        transform: translateX(5px);
-    }
-
-    75% {
-        transform: translateX(-5px);
-    }
+.sw-update-actions .btn-small {
+    padding: 6px 12px;
 }
 
 /* ========== ACHIEVEMENT TOAST ========== */
@@ -1143,6 +1123,38 @@ body {
     font-size: 2rem;
     margin-bottom: var(--spacing-lg);
     color: var(--color-dark);
+}
+
+.daily-result-card {
+    max-width: 520px;
+    text-align: center;
+}
+
+.daily-result-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-lg);
+}
+
+.daily-result-stat {
+    background: var(--color-light);
+    border-radius: 14px;
+    padding: var(--spacing-sm);
+}
+
+.daily-result-value {
+    display: block;
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--color-primary);
+}
+
+.daily-result-label {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.85rem;
+    opacity: 0.75;
 }
 
 /* ========== PAUSE MENU ========== */
@@ -1364,6 +1376,16 @@ body {
     .difficulty-buttons {
         flex-wrap: wrap;
     }
+
+    .daily-result-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .sw-update-banner {
+        flex-direction: column;
+        align-items: flex-start;
+        bottom: var(--spacing-sm);
+    }
 }
 
 @media (max-width: 420px) {
@@ -1402,6 +1424,27 @@ body {
 
     .combo-value {
         font-size: 2rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .animal-card,
+    .animal-card.idle-blink svg,
+    .animal-card.idle-breathe svg,
+    .animal-card.idle-wiggle,
+    .combo-counter,
+    .feedback-popup,
+    .achievement-toast,
+    .unlocked-achievement,
+    .modal,
+    .modal-content,
+    .screen {
+        animation: none !important;
+        transition: none !important;
+    }
+
+    .confetti-particle {
+        display: none !important;
     }
 }
 

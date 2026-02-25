@@ -3,29 +3,54 @@
  * Player levels, XP, unlocks, difficulty adaptation
  */
 
+const STORAGE_KEY = 'wordSafari_progression';
+const DIFFICULTY_KEY = 'wordSafari_difficulty';
+const SCHEMA_VERSION = 2;
+const VALID_DIFFICULTIES = new Set(['adaptive', 'easy', 'medium', 'hard']);
+
+function safeJsonParse(raw) {
+    if (!raw || typeof raw !== 'string') return null;
+    try {
+        return JSON.parse(raw);
+    } catch (error) {
+        console.warn('Progress data is corrupted, falling back to defaults.');
+        return null;
+    }
+}
+
+function toNumber(value, fallback = 0) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function createDefaultStats() {
+    return {
+        gamesPlayed: 0,
+        highScore: 0,
+        animalsDiscovered: 0,
+        dayStreak: 0,
+        playerLevel: 1,
+        totalXP: 0,
+        perfectRounds: 0,
+        fastestLevel: 999,
+        biomesVisited: 0,
+        wordsSpelled: 0,
+        dailyQuestsCompleted: 0,
+        maxCombo: 0,
+        levelsInSession: 0,
+        vocabularyLearned: 0,
+        factsRead: 0,
+        discoveredAnimals: new Set(),
+        learnedAttributes: new Set(),
+        lastPlayDate: null
+    };
+}
+
 export class ProgressionManager {
     constructor() {
         this.playerLevel = 1;
         this.currentXP = 0;
-        this.stats = {
-            gamesPlayed: 0,
-            highScore: 0,
-            animalsDiscovered: 0,
-            dayStreak: 0,
-            playerLevel: 1,
-            totalXP: 0,
-            perfectRounds: 0,
-            fastestLevel: 999,
-            biomesVisited: 0,
-            wordsSpelled: 0,
-            dailyQuestsCompleted: 0,
-            maxCombo: 0,
-            levelsInSession: 0,
-            vocabularyLearned: 0,
-            factsRead: 0,
-            discoveredAnimals: new Set(),
-            lastPlayDate: null
-        };
+        this.stats = createDefaultStats();
 
         this.difficultySettings = {
             adaptive: { timeMultiplier: 1, vocabularyLevel: 'mixed', clueComplexity: 'adaptive' },
@@ -41,31 +66,90 @@ export class ProgressionManager {
         this.checkDailyStreak();
     }
 
+    migrateProgressData(saved) {
+        const defaults = createDefaultStats();
+        const sourceStats = (saved && typeof saved.stats === 'object' && saved.stats) || {};
+        const nextStats = { ...defaults, ...sourceStats };
+
+        // Ensure sets are correctly hydrated.
+        const discoveredAnimals = Array.isArray(sourceStats.discoveredAnimals)
+            ? sourceStats.discoveredAnimals
+            : [];
+        const learnedAttributes = Array.isArray(sourceStats.learnedAttributes)
+            ? sourceStats.learnedAttributes
+            : [];
+
+        nextStats.discoveredAnimals = new Set(discoveredAnimals.filter(Boolean));
+        nextStats.learnedAttributes = new Set(learnedAttributes.filter(Boolean));
+
+        // Preserve historic numeric progress while introducing set-based tracking.
+        nextStats.vocabularyLearned = Math.max(
+            toNumber(sourceStats.vocabularyLearned, 0),
+            nextStats.learnedAttributes.size
+        );
+
+        nextStats.animalsDiscovered = nextStats.discoveredAnimals.size;
+
+        const migrated = {
+            schemaVersion: SCHEMA_VERSION,
+            playerLevel: Math.max(1, toNumber(saved?.playerLevel, 1)),
+            currentXP: Math.max(0, toNumber(saved?.currentXP, 0)),
+            currentDifficulty: VALID_DIFFICULTIES.has(saved?.currentDifficulty)
+                ? saved.currentDifficulty
+                : null,
+            stats: nextStats
+        };
+
+        return migrated;
+    }
+
     loadProgress() {
-        const saved = localStorage.getItem('wordSafari_progression');
-        if (saved) {
-            const data = JSON.parse(saved);
-            this.playerLevel = data.playerLevel || 1;
-            this.currentXP = data.currentXP || 0;
-            Object.assign(this.stats, data.stats);
-            
-            // Convert discoveredAnimals back to Set
-            if (data.stats.discoveredAnimals) {
-                this.stats.discoveredAnimals = new Set(data.stats.discoveredAnimals);
+        const parsed = safeJsonParse(localStorage.getItem(STORAGE_KEY));
+
+        if (parsed) {
+            const migrated = this.migrateProgressData(parsed);
+            this.playerLevel = migrated.playerLevel;
+            this.currentXP = migrated.currentXP;
+            this.stats = migrated.stats;
+
+            if (migrated.currentDifficulty) {
+                this.currentDifficulty = migrated.currentDifficulty;
             }
         }
+
+        const persistedDifficulty = localStorage.getItem(DIFFICULTY_KEY);
+        if (VALID_DIFFICULTIES.has(persistedDifficulty)) {
+            this.currentDifficulty = persistedDifficulty;
+        }
+
+        this.stats.playerLevel = this.playerLevel;
+        this.stats.animalsDiscovered = this.stats.discoveredAnimals.size;
+        this.stats.vocabularyLearned = Math.max(this.stats.vocabularyLearned, this.stats.learnedAttributes.size);
+
+        this.saveProgress();
     }
 
     saveProgress() {
         const data = {
+            schemaVersion: SCHEMA_VERSION,
             playerLevel: this.playerLevel,
             currentXP: this.currentXP,
+            currentDifficulty: this.currentDifficulty,
             stats: {
                 ...this.stats,
-                discoveredAnimals: Array.from(this.stats.discoveredAnimals)
+                discoveredAnimals: Array.from(this.stats.discoveredAnimals),
+                learnedAttributes: Array.from(this.stats.learnedAttributes),
+                animalsDiscovered: this.stats.discoveredAnimals.size,
+                vocabularyLearned: Math.max(this.stats.vocabularyLearned, this.stats.learnedAttributes.size)
             }
         };
-        localStorage.setItem('wordSafari_progression', JSON.stringify(data));
+
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            localStorage.setItem(DIFFICULTY_KEY, this.currentDifficulty);
+        } catch (error) {
+            console.warn('Unable to save progression data:', error);
+        }
     }
 
     checkDailyStreak() {
@@ -91,16 +175,16 @@ export class ProgressionManager {
     }
 
     getXPForLevel(level) {
-        // Balanced XP curve: Level 1 = 100 XP, scales up
+        // Balanced XP curve: Level 1 = 100 XP, scales up.
         return Math.floor(100 * Math.pow(1.15, level - 1));
     }
 
-    addXP(amount, source = 'game') {
+    addXP(amount) {
         this.currentXP += amount;
         this.stats.totalXP += amount;
 
         const xpNeeded = this.getXPForLevel(this.playerLevel);
-        
+
         if (this.currentXP >= xpNeeded) {
             this.levelUp();
         }
@@ -114,7 +198,7 @@ export class ProgressionManager {
         this.stats.playerLevel = this.playerLevel;
         this.currentXP = 0;
 
-        // Unlock new content based on level
+        // Unlock new content based on level.
         const unlocks = this.checkUnlocks();
 
         this.saveProgress();
@@ -123,7 +207,7 @@ export class ProgressionManager {
 
     checkUnlocks() {
         const unlocks = [];
-        
+
         if (this.playerLevel === 5) unlocks.push('Arctic Biome Unlocked! 🏔️');
         if (this.playerLevel === 10) unlocks.push('Desert Biome Unlocked! 🏜️');
         if (this.playerLevel === 15) unlocks.push('Ocean Biome Unlocked! 🌊');
@@ -135,7 +219,7 @@ export class ProgressionManager {
 
     recordGameComplete(score, level, timeElapsed, mistakes) {
         this.stats.gamesPlayed++;
-        
+
         if (score > this.stats.highScore) {
             this.stats.highScore = score;
         }
@@ -150,12 +234,12 @@ export class ProgressionManager {
 
         this.stats.levelsInSession++;
 
-        // Calculate XP based on performance
-        let xpEarned = 50; // Base XP
-        xpEarned += score * 0.1; // Bonus for score
-        xpEarned += (level - 1) * 10; // Level bonus
-        if (mistakes === 0) xpEarned += 25; // Perfect bonus
-        if (timeElapsed < 30) xpEarned += 15; // Speed bonus
+        // Calculate XP based on performance.
+        let xpEarned = 50;
+        xpEarned += score * 0.1;
+        xpEarned += (level - 1) * 10;
+        if (mistakes === 0) xpEarned += 25;
+        if (timeElapsed < 30) xpEarned += 15;
 
         this.addXP(Math.floor(xpEarned));
         this.saveProgress();
@@ -167,11 +251,22 @@ export class ProgressionManager {
         if (!this.stats.discoveredAnimals.has(animalId)) {
             this.stats.discoveredAnimals.add(animalId);
             this.stats.animalsDiscovered = this.stats.discoveredAnimals.size;
-            this.addXP(10); // Bonus XP for new discovery
+            this.addXP(10);
             this.saveProgress();
             return true;
         }
         return false;
+    }
+
+    recordVocabularyLearned(attribute) {
+        if (!attribute) return false;
+        if (this.stats.learnedAttributes.has(attribute)) return false;
+
+        this.stats.learnedAttributes.add(attribute);
+        this.stats.vocabularyLearned = this.stats.learnedAttributes.size;
+        this.addXP(2);
+        this.saveProgress();
+        return true;
     }
 
     recordSpellingWord(correct) {
@@ -202,7 +297,6 @@ export class ProgressionManager {
     }
 
     recordBiomeVisit(biomeName) {
-        // Track unique biomes
         const biomeKey = `biome_${biomeName}`;
         if (!this.stats[biomeKey]) {
             this.stats[biomeKey] = true;
@@ -212,8 +306,9 @@ export class ProgressionManager {
     }
 
     setDifficulty(difficulty) {
+        if (!VALID_DIFFICULTIES.has(difficulty)) return;
         this.currentDifficulty = difficulty;
-        localStorage.setItem('wordSafari_difficulty', difficulty);
+        this.saveProgress();
     }
 
     getDifficulty() {
@@ -224,7 +319,7 @@ export class ProgressionManager {
         if (this.currentDifficulty === 'adaptive') {
             return this.calculateAdaptiveDifficulty();
         }
-        return this.difficultySettings[this.currentDifficulty];
+        return this.difficultySettings[this.currentDifficulty] || this.difficultySettings.adaptive;
     }
 
     calculateAdaptiveDifficulty() {
@@ -232,29 +327,28 @@ export class ProgressionManager {
         const total = correct + wrong;
 
         if (total < 5) {
-            return this.difficultySettings.medium; // Default to medium
+            return this.difficultySettings.medium;
         }
 
         const accuracy = correct / total;
 
         if (accuracy >= 0.9) {
-            // Player doing great, increase difficulty
             return {
                 timeMultiplier: 0.85,
                 vocabularyLevel: 'advanced',
                 clueComplexity: 'complex'
             };
-        } else if (accuracy >= 0.7) {
-            // Balanced performance
-            return this.difficultySettings.medium;
-        } else {
-            // Player struggling, ease up
-            return {
-                timeMultiplier: 1.3,
-                vocabularyLevel: 'simple',
-                clueComplexity: 'basic'
-            };
         }
+
+        if (accuracy >= 0.7) {
+            return this.difficultySettings.medium;
+        }
+
+        return {
+            timeMultiplier: 1.3,
+            vocabularyLevel: 'simple',
+            clueComplexity: 'basic'
+        };
     }
 
     recordPerformance(correct, timeElapsed) {
@@ -264,9 +358,8 @@ export class ProgressionManager {
             this.adaptivePerformance.wrong++;
         }
 
-        // Track average time
         const total = this.adaptivePerformance.correct + this.adaptivePerformance.wrong;
-        this.adaptivePerformance.avgTime = 
+        this.adaptivePerformance.avgTime =
             ((this.adaptivePerformance.avgTime * (total - 1)) + timeElapsed) / total;
     }
 
@@ -277,7 +370,8 @@ export class ProgressionManager {
     getStats() {
         return {
             ...this.stats,
-            animalsDiscovered: this.stats.discoveredAnimals.size
+            animalsDiscovered: this.stats.discoveredAnimals.size,
+            vocabularyLearned: Math.max(this.stats.vocabularyLearned, this.stats.learnedAttributes.size)
         };
     }
 
@@ -299,5 +393,5 @@ export class ProgressionManager {
     }
 }
 
-// Export singleton instance
+// Export singleton instance.
 export const progressionManager = new ProgressionManager();

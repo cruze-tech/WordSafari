@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1170" height="2532" viewBox="0 0 1170 2532">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#87CEEB"/>
+      <stop offset="1" stop-color="#D2B48C"/>
+    </linearGradient>
+  </defs>
+  <rect width="1170" height="2532" fill="url(#sky)"/>
+  <rect x="60" y="120" width="1050" height="180" rx="36" fill="#ffffff" opacity="0.96"/>
+  <text x="585" y="232" text-anchor="middle" font-size="54" font-family="Nunito, sans-serif" font-weight="700" fill="#2C3E50">Find the animal that is very fast</text>
+  <circle cx="350" cy="950" r="150" fill="#D89C3D"/>
+  <circle cx="350" cy="940" r="20" fill="#2C3E50"/>
+  <circle cx="820" cy="950" r="150" fill="#E3B04B"/>
+  <circle cx="820" cy="940" r="20" fill="#2C3E50"/>
+  <rect x="180" y="2000" width="810" height="44" rx="20" fill="#ffffff" opacity="0.65"/>
+  <rect x="180" y="2000" width="470" height="44" rx="20" fill="#6BCF7F"/>
+</svg>

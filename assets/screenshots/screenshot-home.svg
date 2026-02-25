@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1170" height="2532" viewBox="0 0 1170 2532">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFD93D"/>
+      <stop offset="1" stop-color="#FF8C42"/>
+    </linearGradient>
+  </defs>
+  <rect width="1170" height="2532" fill="url(#bg)"/>
+  <text x="585" y="420" text-anchor="middle" font-size="120" font-family="Nunito, sans-serif" font-weight="800" fill="#2C3E50">🦁 Word Safari</text>
+  <rect x="225" y="620" width="720" height="130" rx="60" fill="#ffffff"/>
+  <text x="585" y="705" text-anchor="middle" font-size="64" font-family="Nunito, sans-serif" font-weight="700" fill="#FF8C42">Start Adventure</text>
+  <rect x="225" y="790" width="720" height="130" rx="60" fill="#ffffff"/>
+  <text x="585" y="875" text-anchor="middle" font-size="58" font-family="Nunito, sans-serif" font-weight="700" fill="#2C3E50">Spelling Bee</text>
+</svg>

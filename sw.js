@@ -1,76 +1,149 @@
-const CACHE_NAME = 'wordsafari-cache-v2';
-const ASSETS_TO_CACHE = [
+const APP_VERSION = '3.0.0';
+const CACHE_PREFIX = 'wordsafari';
+const PRECACHE_NAME = `${CACHE_PREFIX}-precache-v${APP_VERSION}`;
+const RUNTIME_NAME = `${CACHE_PREFIX}-runtime-v${APP_VERSION}`;
+
+const APP_SHELL_ASSETS = [
     './',
     './index.html',
+    './offline.html',
     './css/style.css',
+    './manifest.json',
+    './js/main.js',
     './js/data.js',
     './js/audio.js',
     './js/achievements.js',
     './js/progression.js',
     './js/game.js',
     './js/ui.js',
-    './manifest.json'
+    './js/svgTemplates.js',
+    './js/svgFactory.js',
+    './assets/icons/icon.svg',
+    './assets/icons/favicon-32.png',
+    './assets/icons/apple-touch-icon-180.png',
+    './assets/icons/icon-192.png',
+    './assets/icons/icon-512.png',
+    './assets/icons/icon-maskable-512.png',
+    './assets/screenshots/screenshot-home.svg',
+    './assets/screenshots/screenshot-gameplay.svg',
+    './assets/screenshots/screenshot-desktop.svg'
 ];
 
-// Install Event
-self.addEventListener('install', event => {
+self.addEventListener('install', (event) => {
     event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then(cache => {
-                console.log('Opened cache');
-                return cache.addAll(ASSETS_TO_CACHE);
+        caches.open(PRECACHE_NAME)
+            .then((cache) => cache.addAll(APP_SHELL_ASSETS))
+            .catch((error) => {
+                console.error('Precache failed:', error);
+                throw error;
             })
     );
-    self.skipWaiting();
 });
 
-// Activate Event
-self.addEventListener('activate', event => {
+self.addEventListener('activate', (event) => {
     event.waitUntil(
-        caches.keys().then(cacheNames => {
-            return Promise.all(
-                cacheNames.map(cache => {
-                    if (cache !== CACHE_NAME) {
-                        console.log('Clearing old cache');
-                        return caches.delete(cache);
-                    }
-                })
-            );
+        caches.keys().then((cacheNames) => Promise.all(
+            cacheNames
+                .filter((name) => name.startsWith(`${CACHE_PREFIX}-`) && ![PRECACHE_NAME, RUNTIME_NAME].includes(name))
+                .map((name) => caches.delete(name))
+        )).then(() => self.clients.claim())
+    );
+});
+
+self.addEventListener('message', (event) => {
+    if (event.data?.type === 'SKIP_WAITING') {
+        self.skipWaiting();
+    }
+});
+
+function isSafeRequest(request) {
+    return request.method === 'GET' && request.url.startsWith('http');
+}
+
+function isNavigationRequest(request) {
+    return request.mode === 'navigate' || request.destination === 'document';
+}
+
+function isSameOrigin(url) {
+    return url.origin === self.location.origin;
+}
+
+function isStaticAssetRequest(request, url) {
+    if (!isSameOrigin(url)) return false;
+
+    const staticDestinations = new Set(['style', 'script', 'image', 'font', 'manifest']);
+    if (staticDestinations.has(request.destination)) return true;
+
+    return (
+        url.pathname.startsWith('/css/') ||
+        url.pathname.startsWith('/js/') ||
+        url.pathname.startsWith('/assets/') ||
+        url.pathname.endsWith('.json') ||
+        url.pathname.endsWith('.svg') ||
+        url.pathname.endsWith('.png')
+    );
+}
+
+async function networkFirstForNavigation(request) {
+    const runtimeCache = await caches.open(RUNTIME_NAME);
+
+    try {
+        const fresh = await fetch(request);
+        runtimeCache.put(request, fresh.clone());
+        return fresh;
+    } catch (error) {
+        const cached = await runtimeCache.match(request);
+        if (cached) return cached;
+
+        const precachedPage = await caches.match(request);
+        if (precachedPage) return precachedPage;
+
+        return caches.match('./offline.html');
+    }
+}
+
+async function staleWhileRevalidate(request) {
+    const runtimeCache = await caches.open(RUNTIME_NAME);
+    const cached = await runtimeCache.match(request);
+
+    const networkFetch = fetch(request)
+        .then((response) => {
+            if (response && response.status === 200) {
+                runtimeCache.put(request, response.clone());
+            }
+            return response;
         })
-    );
-    self.clients.claim();
-});
+        .catch(() => null);
 
-// Fetch Event
-self.addEventListener('fetch', event => {
-    event.respondWith(
-        caches.match(event.request)
-            .then(response => {
-                if (response) {
-                    return response; // Return cached version
-                }
+    if (cached) {
+        return cached;
+    }
 
-                return fetch(event.request).then(
-                    function (response) {
-                        // Check if we received a valid response
-                        if (!response || response.status !== 200 || response.type !== 'basic') {
-                            return response;
-                        }
+    const networkResponse = await networkFetch;
+    if (networkResponse) {
+        return networkResponse;
+    }
 
-                        // IMPORTANT: Clone the response. A response is a stream
-                        // and because we want the browser to consume the response
-                        // as well as the cache consuming the response, we need
-                        // to clone it so we have two streams.
-                        var responseToCache = response.clone();
+    return caches.match(request);
+}
 
-                        caches.open(CACHE_NAME)
-                            .then(function (cache) {
-                                cache.put(event.request, responseToCache);
-                            });
+self.addEventListener('fetch', (event) => {
+    const { request } = event;
 
-                        return response;
-                    }
-                );
-            })
-    );
+    if (!isSafeRequest(request)) return;
+
+    const url = new URL(request.url);
+
+    if (isNavigationRequest(request)) {
+        event.respondWith(networkFirstForNavigation(request));
+        return;
+    }
+
+    if (isStaticAssetRequest(request, url)) {
+        event.respondWith(staleWhileRevalidate(request));
+        return;
+    }
+
+    // Cross-origin and non-static requests are passed through.
+    event.respondWith(fetch(request).catch(() => caches.match(request)));
 });

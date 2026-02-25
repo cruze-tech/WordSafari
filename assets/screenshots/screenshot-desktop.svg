@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="ws" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#87CEEB"/>
+      <stop offset="1" stop-color="#D2B48C"/>
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#ws)"/>
+  <rect x="90" y="60" width="1740" height="120" rx="24" fill="#ffffff" opacity="0.95"/>
+  <text x="960" y="138" text-anchor="middle" font-size="54" font-family="Nunito, sans-serif" font-weight="700" fill="#2C3E50">Word Safari: Find the animal that is very fast</text>
+  <circle cx="520" cy="520" r="170" fill="#D89C3D"/>
+  <circle cx="960" cy="520" r="170" fill="#E3B04B"/>
+  <circle cx="1400" cy="520" r="170" fill="#8E8E8E"/>
+  <rect x="360" y="920" width="1200" height="36" rx="18" fill="#ffffff" opacity="0.6"/>
+  <rect x="360" y="920" width="660" height="36" rx="18" fill="#6BCF7F"/>
+</svg>

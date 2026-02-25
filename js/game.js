@@ -6,6 +6,7 @@ import { vocabularyClues, getAnimalsByAttribute, getRandomAnimals, spellingWords
 import { playSound, speak } from './audio.js';
 import { achievementManager } from './achievements.js';
 import { progressionManager } from './progression.js';
+import { renderAnimalSvg } from './svgFactory.js';
 
 /* ========================================
    GAME MANAGER CLASS
@@ -167,7 +168,7 @@ class GameManager {
         const container = document.createElement('div');
         container.className = 'animal-card';
         container.dataset.animalId = animal.id;
-        container.innerHTML = animal.svg || '<div>🦁</div>'; // Fallback emoji
+        container.innerHTML = renderAnimalSvg(animal.id);
 
         const label = document.createElement('div');
         label.className = 'animal-label';
@@ -196,6 +197,7 @@ class GameManager {
 
             // Record animal discovery
             const isNew = progressionManager.recordAnimalDiscovered(animal.id);
+            progressionManager.recordVocabularyLearned(this.currentClue?.attribute);
             if (isNew && animal.facts) {
                 this.showAnimalFactCard(animal);
             }
@@ -282,7 +284,7 @@ class GameManager {
         const statusEl = document.getElementById('fact-status');
 
         if (nameEl) nameEl.textContent = animal.name;
-        if (svgEl) svgEl.innerHTML = animal.svg || '🦁';
+        if (svgEl) svgEl.innerHTML = renderAnimalSvg(animal.id);
         if (descEl) descEl.textContent = animal.facts.description || '';
         if (habitatEl) habitatEl.textContent = animal.facts.habitat || '';
         if (dietEl) dietEl.textContent = animal.facts.diet || '';
@@ -631,10 +633,8 @@ class DailyQuestManager {
 
         const score = this.correctAnswers * 20;
         setTimeout(() => {
-            alert(`Daily Quest Complete!\n✓ Correct: ${this.correctAnswers}/${this.questions.length}\n🏆 Score: ${score}\n⭐ +30 XP Earned!`);
             if (window.uiManager) {
-                window.uiManager.showScreen('start');
-                window.uiManager.updateStatsDisplay();
+                window.uiManager.showDailyQuestResult(this.correctAnswers, this.questions.length, score);
             }
         }, 500);
     }
@@ -685,7 +685,7 @@ class SentenceBuilderManager {
         document.getElementById('slot-name').dataset.expected = myName;
         document.getElementById('slot-adjective').dataset.expected = myAdj;
         document.getElementById('slot-category').dataset.expected = myCat;
-        document.getElementById('sentence-animal-svg').innerHTML = this.currentAnimal.svg;
+        document.getElementById('sentence-animal-svg').innerHTML = renderAnimalSvg(this.currentAnimal.id);
 
         // Generate word bank (mix correct with random)
         const bank = [myName, myAdj, myCat];

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Word Safari Icon">
+  <defs>
+    <linearGradient id="ws-grad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FF8C42" />
+      <stop offset="100%" stop-color="#FFD93D" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="120" fill="url(#ws-grad)"/>
+  <circle cx="256" cy="220" r="130" fill="#D89C3D"/>
+  <circle cx="205" cy="205" r="15" fill="#2C3E50"/>
+  <circle cx="307" cy="205" r="15" fill="#2C3E50"/>
+  <path d="M256 250 Q230 278 256 306 Q282 278 256 250" fill="#2C3E50"/>
+  <path d="M160 332 Q206 366 256 352 Q306 366 352 332" fill="none" stroke="#2C3E50" stroke-width="16" stroke-linecap="round"/>
+</svg>
